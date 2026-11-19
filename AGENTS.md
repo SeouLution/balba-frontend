@@ -29,7 +29,7 @@
 ## 스킬
 
 - 스킬은 `.claude/skills/`에 있다. `.agents/skills`는 같은 폴더를 가리키는 링크다.
-- Claude Code는 `/commit`, `/pr`로, Codex는 `$commit`, `$pr`로 실행한다.
+- Claude Code는 `/commit`, `/pr`, `/pr-review`로, Codex는 `$commit`, `$pr`, `$pr-review`로 실행한다.
 
 ## 커맨드
 
