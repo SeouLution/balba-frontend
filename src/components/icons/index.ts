@@ -1,0 +1,35 @@
+/**
+ * 아이콘은 전부 여기서 가져다 써요.
+ *   import { Check, SparkIcon } from "@/components/icons";
+ *
+ * Figma 아이콘 섹션에 있는 lucide 아이콘만 모아뒀어요.
+ * 새 lucide 아이콘이 필요하면 여기에 한 줄 추가하면 돼요.
+ */
+export {
+  ArrowUpFromLine,
+  Box,
+  Camera,
+  ChartColumn,
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  Clock,
+  CloudRain,
+  House,
+  Minus,
+  Plus,
+  Search,
+  Settings,
+  StickyNote,
+  Tag,
+  TriangleAlert,
+  X,
+} from "lucide-react";
+
+export { SparkIcon } from "./SparkIcon";
+
+// TODO: 로고 SVG 받으면 추가
+// export { LogoIcon } from "./LogoIcon";
+// export { GoogleIcon, NaverIcon, AppleIcon } from "./SocialIcons";
