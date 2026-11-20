@@ -28,8 +28,8 @@ export {
   X,
 } from "lucide-react";
 
+export { LogoMark } from "./LogoMark";
 export { SparkIcon } from "./SparkIcon";
 
-// TODO: 로고 SVG 받으면 추가
-// export { LogoIcon } from "./LogoIcon";
+// TODO: 간편 로그인 로고 SVG 받으면 추가
 // export { GoogleIcon, NaverIcon, AppleIcon } from "./SocialIcons";
