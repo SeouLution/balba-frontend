@@ -2,5 +2,5 @@
 @import "./styles/theme.css";
 
 body {
-  @apply bg-bg font-sans text-text-primary;
+  @apply bg-bg-page font-sans text-text-black;
 }
