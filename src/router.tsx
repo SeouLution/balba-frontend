@@ -19,6 +19,9 @@ import {
   OnboardingStoreRequired,
 } from "@/pages/onboarding/OnboardingLayout";
 import { OnboardingStartPage } from "@/pages/onboarding/OnboardingStartPage";
+import { OrderEditPage } from "@/pages/order/OrderEditPage";
+import { OrderPage } from "@/pages/order/OrderPage";
+import { OrderSharePage } from "@/pages/order/OrderSharePage";
 import { ReceiptPhotoPage } from "@/pages/onboarding/ReceiptPhotoPage";
 import { RecipeDraftPage } from "@/pages/onboarding/RecipeDraftPage";
 import { SalesColumnsPage } from "@/pages/onboarding/SalesColumnsPage";
@@ -40,6 +43,9 @@ export const router = createBrowserRouter([
       { path: "/ingredients/menus/new", element: <MenuAddPage /> },
       { path: "/ingredients/menus/review", element: <MenuReviewPage /> },
       { path: "/receipt", element: <ReceiptFlowPage /> },
+      { path: "/order", element: <OrderPage /> },
+      { path: "/order/new", element: <OrderEditPage /> },
+      { path: "/order/share", element: <OrderSharePage /> },
     ],
   },
   {
