@@ -27,10 +27,6 @@ export function OnboardingIntro() {
           </li>
         ))}
       </ul>
-      <p className="mt-8 text-label-s">
-        도움이 필요하면{" "}
-        <strong className="font-semibold underline underline-offset-4">고객센터</strong>
-      </p>
     </div>
   );
 }
