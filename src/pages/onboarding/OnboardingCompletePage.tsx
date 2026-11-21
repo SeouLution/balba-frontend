@@ -34,6 +34,7 @@ export function OnboardingCompletePage() {
   return (
     <OnboardingScreen
       completed
+      receiptAttached={receiptPhotoCount > 0}
       wideCard
       scrollBody
       footer={

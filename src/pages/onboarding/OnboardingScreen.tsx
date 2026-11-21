@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, type ButtonHTMLAttributes, type ReactNode } f
 import { Link } from "react-router";
 
 import brandLogo from "@/assets/brand/balba-logo-white.svg";
+import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Check, ChevronLeft, X } from "@/components/icons";
 import { OnboardingIntro } from "@/components/OnboardingIntro";
@@ -25,6 +26,7 @@ type OnboardingScreenProps = {
   footer?: ReactNode;
   children: ReactNode;
   completed?: boolean;
+  receiptAttached?: boolean;
   wideCard?: boolean;
   preparingIngredients?: boolean;
   scrollBody?: boolean;
@@ -39,6 +41,7 @@ export function OnboardingScreen({
   footer,
   children,
   completed,
+  receiptAttached = false,
   wideCard,
   preparingIngredients,
   scrollBody,
@@ -72,8 +75,9 @@ export function OnboardingScreen({
             <ol className="mt-10 grid gap-5 text-subtitle font-bold">
               {progressSteps.map(({ label, details, optional }, index) => {
                 const position = index + 1;
-                const isCurrent = position === currentStep;
-                const isDone = position < currentStep && !optional;
+                const isDone = completed || position < currentStep || (optional && receiptAttached);
+                const isCurrent = !isDone && position === currentStep;
+                const isDeferred = optional && !receiptAttached && position < currentStep;
                 return (
                   <li
                     key={label}
@@ -83,6 +87,7 @@ export function OnboardingScreen({
                     <div
                       className={cn(
                         "flex items-center gap-5",
+                        isDeferred && "w-[251px] max-w-full",
                         !isCurrent && !isDone && "text-text-gray",
                       )}
                     >
@@ -94,14 +99,27 @@ export function OnboardingScreen({
                         )}
                       >
                         {isDone ? (
-                          <Check size={16} className="shrink-0" aria-hidden />
+                          <>
+                            <Check size={16} className="shrink-0" aria-hidden />
+                            <span className="sr-only">완료</span>
+                          </>
                         ) : (
                           <span className="text-center text-label-s-b font-semibold">
                             {position}
                           </span>
                         )}
                       </span>
-                      <span className="break-keep">{label}</span>
+                      <span className={cn("min-w-0 break-keep", isDeferred && "flex-1")}>
+                        {label}
+                      </span>
+                      {isDeferred && (
+                        <Badge
+                          type="outline"
+                          className="h-7.5 w-[51px] justify-center rounded-[6px] border border-button-subtle bg-transparent px-1.5 py-1 font-medium text-text-white"
+                        >
+                          나중에
+                        </Badge>
+                      )}
                     </div>
                     {details && (
                       <ul className="grid gap-4 pl-[62px] text-body-m font-normal">

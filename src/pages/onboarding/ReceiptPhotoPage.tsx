@@ -30,6 +30,7 @@ export function ReceiptPhotoPage() {
   return (
     <OnboardingScreen
       step={4}
+      receiptAttached={receiptPhotoCount > 0}
       progressPercent={65}
       wideCard
       scrollBody

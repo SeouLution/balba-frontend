@@ -13,7 +13,7 @@ import { OnboardingButton, OnboardingHeading, OnboardingScreen } from "./Onboard
 
 export function RecipeDraftPage() {
   const navigate = useNavigate();
-  const { recipeAmounts, updateRecipeAmount } = useOnboarding();
+  const { recipeAmounts, updateRecipeAmount, receiptPhotoCount } = useOnboarding();
   const [recipeIndex, setRecipeIndex] = useState(0);
   const recipe = recipeExamples[recipeIndex];
 
@@ -21,6 +21,7 @@ export function RecipeDraftPage() {
     <OnboardingScreen
       step={4}
       sidebarStep={5}
+      receiptAttached={receiptPhotoCount > 0}
       wideCard
       scrollBody
       header={
