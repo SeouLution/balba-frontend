@@ -16,10 +16,12 @@ import { ReceiptPhotoPage } from "@/pages/onboarding/ReceiptPhotoPage";
 import { RecipeDraftPage } from "@/pages/onboarding/RecipeDraftPage";
 import { SalesColumnsPage } from "@/pages/onboarding/SalesColumnsPage";
 import { SalesUploadPage } from "@/pages/onboarding/SalesUploadPage";
+import { SignUpPage } from "@/pages/onboarding/SignUpPage";
 import { StoreInfoPage } from "@/pages/onboarding/StoreInfoPage";
 
 export const router = createBrowserRouter([
   { path: "/", element: <LoginPage /> },
+  { path: "/signup", element: <SignUpPage /> },
   { path: "/home", element: <App /> },
   {
     path: "/onboarding",
