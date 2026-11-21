@@ -1,5 +1,5 @@
 import { request } from "@/api/client";
-import type { DayHours } from "@/pages/onboarding/onboardingTypes";
+import type { DayHours } from "@/api/stores";
 
 // TOMORROW 전날 밤(준비량 · 발주) · TODAY 당일 아침(오늘 미리 만들어둘 양)
 // KST 20:00에 TOMORROW, 자정에 TODAY로 바뀐다. 프론트는 시계로 판단하지 않고 이 값을 따른다.

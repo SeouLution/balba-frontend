@@ -1,28 +1,33 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
+import type { Recipe } from "@/api/recipes";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { IconButton } from "@/components/IconButton";
 import { Pen } from "@/components/icons";
+import { Loading } from "@/components/Loading";
+import { useRecipes } from "@/hooks/useRecipes";
 
 import { EditMenuIngredientsDialog } from "./EditMenuIngredientsDialog";
-import { ingredientMenuExamples } from "./ingredientExamples";
 import { useOnboarding } from "./onboardingContext";
-import { OnboardingButton, OnboardingHeading, OnboardingScreen } from "./OnboardingScreen";
-import type { RecipeIngredient } from "./onboardingTypes";
-import { getRecipeIngredients } from "./recipeIngredients";
-import { exampleSales } from "./salesColumns";
+import {
+  OnboardingButton,
+  OnboardingError,
+  OnboardingHeading,
+  OnboardingScreen,
+} from "./OnboardingScreen";
 
 const previewLimit = 5;
 
 function MenuIngredientsCard({
-  name,
-  items,
+  recipe: {
+    menu: { name },
+    items,
+  },
   onEdit,
 }: {
-  name: string;
-  items: RecipeIngredient[];
+  recipe: Recipe;
   onEdit: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -43,13 +48,13 @@ function MenuIngredientsCard({
       </div>
       {items.length === 0 && <p className="text-body-s text-text-gray">등록된 재료가 없어요.</p>}
       <ul className="grid grid-cols-2 gap-2 md:grid-cols-[repeat(3,minmax(0,146px))] md:gap-4">
-        {visibleItems.map(({ id, name, amount, unit }) => (
-          <li key={id}>
+        {visibleItems.map(({ ingredient, quantity }) => (
+          <li key={ingredient.id}>
             <Badge className="flex h-full min-h-10 flex-wrap items-center gap-x-2 gap-y-0 rounded-sm bg-bg-page px-2.5 py-1.5 text-body-s whitespace-normal md:text-body-l">
-              <span className="min-w-0 wrap-anywhere text-text-gray-light">{name}</span>
+              <span className="min-w-0 wrap-anywhere text-text-gray-light">{ingredient.name}</span>
               <span className="font-semibold whitespace-nowrap text-text-gray-darker">
-                {amount}
-                {unit}
+                {quantity.value}
+                {quantity.unit}
               </span>
             </Badge>
           </li>
@@ -73,23 +78,12 @@ function MenuIngredientsCard({
 
 export function CoreIngredientsPage() {
   const navigate = useNavigate();
-  const onboarding = useOnboarding();
-  const [editingMenuName, setEditingMenuName] = useState<string>();
-  const menus = ingredientMenuExamples.map((menu) => ({
-    name: menu.name,
-    items: getRecipeIngredients(menu, onboarding),
-  }));
-  const editingMenu = menus.find(({ name }) => name === editingMenuName);
-
-  function confirmIngredients() {
-    const selectedNames = new Set(
-      menus.flatMap(({ items }) =>
-        items.filter(({ amount }) => amount > 0).map(({ name }) => name),
-      ),
-    );
-    onboarding.setIngredientIds([...selectedNames]);
-    navigate("../receipt");
-  }
+  const { store } = useOnboarding();
+  const storeId = store?.id ?? "";
+  const recipes = useRecipes(storeId, { enabled: Boolean(store) });
+  const [editingMenuId, setEditingMenuId] = useState<string>();
+  const menus = recipes.data?.items ?? [];
+  const editingMenu = menus.find(({ menu }) => menu.id === editingMenuId);
 
   return (
     <OnboardingScreen
@@ -98,41 +92,42 @@ export function CoreIngredientsPage() {
       scrollBody
       progressPercent={48.75}
       onBack={() => navigate("../columns")}
-      footer={<OnboardingButton onClick={confirmIngredients}>맞아요, 다음</OnboardingButton>}
+      footer={
+        recipes.isError ? (
+          <OnboardingButton disabled={recipes.isFetching} onClick={() => void recipes.refetch()}>
+            다시 확인
+          </OnboardingButton>
+        ) : recipes.data?.generationStatus === "READY" ? (
+          <OnboardingButton onClick={() => navigate("../receipt")}>맞아요, 다음</OnboardingButton>
+        ) : null
+      }
     >
-      <OnboardingHeading
-        title={
-          <>
-            메뉴 {exampleSales.menuCount}에 들어가는
-            <br />
-            재료와 양을 추렸어요
-          </>
-        }
-      >
-        1인분에 들어가는 양이에요. 메뉴 이름만 보고 고른 거라 틀릴 수 있으니,
-        <br className="hidden md:block" />
-        다른 곳만 고쳐 주세요.
+      <OnboardingHeading title="메뉴별 재료와 양을 확인해 주세요">
+        메뉴 1인분에 들어가는 재료와 양을 확인하고 필요한 곳을 고쳐 주세요.
       </OnboardingHeading>
-      <div className="grid gap-4 md:mt-5">
-        {menus.map(({ name, items }) => (
-          <MenuIngredientsCard
-            key={name}
-            name={name}
-            items={items}
-            onEdit={() => setEditingMenuName(name)}
-          />
-        ))}
-      </div>
+      {recipes.isError ? (
+        <OnboardingError>메뉴별 재료를 불러오지 못했어요. 다시 확인해 주세요.</OnboardingError>
+      ) : recipes.data?.generationStatus !== "READY" ? (
+        <Loading>메뉴별 재료와 양을 확인하고 있어요.</Loading>
+      ) : menus.length === 0 ? (
+        <p className="text-body-s text-text-gray">확인할 메뉴가 없어요.</p>
+      ) : (
+        <div className="grid gap-4 md:mt-5">
+          {menus.map((recipe) => (
+            <MenuIngredientsCard
+              key={recipe.menu.id}
+              recipe={recipe}
+              onEdit={() => setEditingMenuId(recipe.menu.id)}
+            />
+          ))}
+        </div>
+      )}
       {editingMenu && (
         <EditMenuIngredientsDialog
-          key={editingMenu.name}
-          menuName={editingMenu.name}
-          ingredients={editingMenu.items}
-          onClose={() => setEditingMenuName(undefined)}
-          onSave={(items) => {
-            onboarding.saveMenuIngredients(editingMenu.name, items);
-            setEditingMenuName(undefined);
-          }}
+          key={editingMenu.menu.id}
+          storeId={storeId}
+          recipe={editingMenu}
+          onClose={() => setEditingMenuId(undefined)}
         />
       )}
     </OnboardingScreen>

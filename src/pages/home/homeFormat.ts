@@ -1,6 +1,6 @@
 import type { EventSummary, ForecastItem, HomeView } from "@/api/home";
 import type { OrderLine } from "@/api/orderPlans";
-import type { DayHours, DayOfWeek } from "@/pages/onboarding/onboardingTypes";
+import type { DayHours, DayOfWeek } from "@/api/stores";
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 const DAY_CODES: DayOfWeek[] = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];

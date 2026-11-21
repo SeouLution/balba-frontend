@@ -10,3 +10,8 @@ export function useStoreId() {
   }
   return storeId;
 }
+
+/** RequireStore 밖(온보딩 등)에서도 부를 수 있는 버전. 가게 id가 없으면 null */
+export function useOptionalStoreId() {
+  return useContext(StoreIdContext);
+}

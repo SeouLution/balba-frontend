@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { Navigate, Outlet, useLocation } from "react-router";
+import { Navigate, Outlet, useLocation, useMatch } from "react-router";
+
+import { useSalesImport } from "@/hooks/useSalesImport";
 
 import { initialStoreDraft, useOnboarding, type OnboardingContext } from "./onboardingContext";
-import type { ColumnMapping, RecipeUnit } from "./onboardingTypes";
-import { withoutMenuOverrides } from "./recipeIngredients";
-import { exampleDetection } from "./salesColumns";
 
 export function OnboardingLayout() {
   const { pathname } = useLocation();
@@ -13,51 +12,29 @@ export function OnboardingLayout() {
   }, [pathname]);
 
   const [draft, setDraft] = useState(initialStoreDraft);
-  const [fileName, setFileName] = useState("");
-  const [mapping, setMapping] = useState<ColumnMapping>(exampleDetection);
-  const [salesConfirmed, setSalesConfirmed] = useState(false);
-  const [ingredientIds, setIngredientIds] = useState<string[] | null>(null);
+  const [store, setStore] = useState<OnboardingContext["store"]>(null);
+  const [salesUpload, setSalesUpload] = useState<OnboardingContext["salesUpload"]>(null);
+  const isColumnsPage = Boolean(useMatch("/onboarding/columns"));
+  const isCompletePage = Boolean(useMatch("/onboarding/complete"));
+  const salesImport = useSalesImport(
+    store?.id ?? "",
+    salesUpload?.id ?? null,
+    isColumnsPage || Boolean(isCompletePage && salesUpload),
+  );
   const [receiptPhotoCount, setReceiptPhotoCount] = useState(0);
-  const [recipeAmounts, setRecipeAmounts] = useState<Record<string, number>>({});
-  const [recipeUnits, setRecipeUnits] = useState<OnboardingContext["recipeUnits"]>({});
-  const [editedMenuIngredients, setEditedMenuIngredients] = useState<
-    OnboardingContext["editedMenuIngredients"]
-  >({});
-
   const context: OnboardingContext = {
     draft,
     updateDraft: (changes) => setDraft((current) => ({ ...current, ...changes })),
-    fileName,
-    selectFile: (name) => {
-      setFileName(name);
-      setMapping(exampleDetection);
-      setSalesConfirmed(false);
-      setIngredientIds(null);
-      setReceiptPhotoCount(0);
-      setRecipeAmounts({});
-      setRecipeUnits({});
-      setEditedMenuIngredients({});
+    store,
+    setStore,
+    salesUpload,
+    setSalesUpload: (upload) => {
+      setSalesUpload(upload);
     },
-    mapping,
-    setMapping,
-    salesConfirmed,
-    setSalesConfirmed,
-    ingredientIds,
-    setIngredientIds,
+    salesImport,
+    salesConfirmed: salesImport.data?.status === "COMPLETED",
     receiptPhotoCount,
     addReceiptPhotos: (count) => setReceiptPhotoCount((current) => current + count),
-    recipeAmounts,
-    updateRecipeAmount: (key, amount) =>
-      setRecipeAmounts((current) => ({ ...current, [key]: amount })),
-    recipeUnits,
-    updateRecipeUnit: (key, unit: RecipeUnit) =>
-      setRecipeUnits((current) => ({ ...current, [key]: unit })),
-    editedMenuIngredients,
-    saveMenuIngredients: (menuName, ingredients) => {
-      setEditedMenuIngredients((current) => ({ ...current, [menuName]: ingredients }));
-      setRecipeAmounts((current) => withoutMenuOverrides(current, menuName));
-      setRecipeUnits((current) => withoutMenuOverrides(current, menuName));
-    },
   };
 
   return <Outlet context={context} />;
@@ -65,16 +42,12 @@ export function OnboardingLayout() {
 
 export function OnboardingStoreRequired() {
   const context = useOnboarding();
-  return context.draft.name.trim() && context.draft.roadAddress ? (
-    <Outlet context={context} />
-  ) : (
-    <Navigate replace to="/onboarding/store" />
-  );
+  return context.store ? <Outlet context={context} /> : <Navigate replace to="/onboarding/store" />;
 }
 
 export function OnboardingFileRequired() {
   const context = useOnboarding();
-  return context.fileName ? (
+  return context.salesUpload ? (
     <Outlet context={context} />
   ) : (
     <Navigate replace to="/onboarding/upload" />

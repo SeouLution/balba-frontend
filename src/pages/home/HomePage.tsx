@@ -1,5 +1,7 @@
 import { useState, type ReactNode } from "react";
+import { Navigate } from "react-router";
 
+import { ApiError } from "@/api/client";
 import { Button } from "@/components";
 import { AppTabBar } from "@/components/AppTabBar";
 import { Loading } from "@/components/Loading";
@@ -17,31 +19,14 @@ import { SettingsMenu } from "./SettingsMenu";
 import { WeatherRow } from "./WeatherRow";
 
 /** 2.0-1 전날 저녁(TOMORROW) · 2.2 당일 아침(TODAY). 어느 쪽인지는 서버의 view를 따른다. */
+// 로그인 · 가게 확인은 RequireStore가 먼저 한다.
 export function HomePage() {
   const storeId = useStoreId();
   const homeQuery = useHome(storeId);
   const [isEventsOpen, setIsEventsOpen] = useState(false);
 
-  if (homeQuery.isPending) {
-    return (
-      <HomeLayout>
-        <Loading>홈을 불러오고 있어요.</Loading>
-      </HomeLayout>
-    );
-  }
-
-  if (homeQuery.isError) {
-    return (
-      <HomeLayout>
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 py-20">
-          <p className="text-body-m text-text-gray-darker">홈을 불러오지 못했어요.</p>
-          <Button variant="secondary" onClick={() => homeQuery.refetch()}>
-            다시 불러오기
-          </Button>
-        </div>
-      </HomeLayout>
-    );
-  }
+  if (homeQuery.isPending) return <HomeLoading />;
+  if (homeQuery.isError) return <HomeError error={homeQuery.error} retry={homeQuery.refetch} />;
 
   const home = homeQuery.data;
   const isTomorrow = home.view === "TOMORROW";
@@ -104,6 +89,29 @@ export function HomePage() {
           onClose={() => setIsEventsOpen(false)}
         />
       )}
+    </HomeLayout>
+  );
+}
+
+function HomeLoading() {
+  return (
+    <HomeLayout>
+      <Loading>홈을 불러오고 있어요.</Loading>
+    </HomeLayout>
+  );
+}
+
+function HomeError({ error, retry }: { error: Error; retry: () => void }) {
+  if (error instanceof ApiError && error.status === 401) return <Navigate to="/" replace />;
+
+  return (
+    <HomeLayout>
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 py-20">
+        <p className="text-body-m text-text-gray-darker">홈을 불러오지 못했어요.</p>
+        <Button variant="secondary" onClick={retry}>
+          다시 불러오기
+        </Button>
+      </div>
     </HomeLayout>
   );
 }

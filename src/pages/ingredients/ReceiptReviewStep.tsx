@@ -37,7 +37,8 @@ export function ReceiptReviewStep({
   const isReading = scanQuery.isPending || scan?.status === "PROCESSING";
   const questions = scan?.status === "NEEDS_REVIEW" ? (scan.questions ?? []) : [];
   const currentQuestion = questions.find((question) => !(question.id in answers));
-  const canSave = scan?.status === "NEEDS_REVIEW" && !currentQuestion;
+  const hasReceipts = scan?.groups?.some(({ receipts }) => receipts.length > 0);
+  const canSave = scan?.status === "NEEDS_REVIEW" && hasReceipts && !currentQuestion;
 
   // 백엔드가 PROCESSING에 머물면 끝없이 기다리지 않도록 상한을 둔다.
   useEffect(() => {
@@ -48,7 +49,7 @@ export function ReceiptReviewStep({
 
   // 물어볼 게 없거나 다 답했으면 바로 저장하고, 이미 저장된 영수증이면 그대로 끝낸다.
   useEffect(() => {
-    if (!scan) return;
+    if (!scan || scanQuery.isFetching || scanQuery.isError) return;
     // 들어왔을 때 이미 저장된 영수증(뒤로 갔다 다시 온 경우 등)만 여기서 끝낸다.
     if (scan.status === "CONFIRMED" && confirmReceiptScan.isIdle) {
       onConfirmed(ingredientNamesOf(scan));
@@ -61,7 +62,15 @@ export function ReceiptReviewStep({
       },
       { onSuccess: () => onConfirmed(ingredientNamesOf(scan)) },
     );
-  }, [scan, canSave, answers, confirmReceiptScan, onConfirmed]);
+  }, [
+    scan,
+    scanQuery.isFetching,
+    scanQuery.isError,
+    canSave,
+    answers,
+    confirmReceiptScan,
+    onConfirmed,
+  ]);
 
   // 폴링 중 재조회가 실패하면 data에는 직전 PROCESSING이 남는다. 그래서 에러를 먼저 본다.
   if (scanQuery.isError || hasTimedOut || confirmReceiptScan.isError) {
@@ -77,10 +86,10 @@ export function ReceiptReviewStep({
           </p>
           <Button
             variant="secondary"
-            onClick={() => {
+            onClick={async () => {
               setHasTimedOut(false);
+              await scanQuery.refetch();
               confirmReceiptScan.reset();
-              scanQuery.refetch();
             }}
           >
             다시 시도하기
@@ -90,7 +99,7 @@ export function ReceiptReviewStep({
     );
   }
 
-  if (scan?.status === "NEEDS_REVIEW" && (scan.groups ?? []).length === 0) {
+  if (scan?.status === "NEEDS_REVIEW" && !hasReceipts) {
     return (
       <ReceiptStepLayout title="영수증 읽기" onBack={onBack}>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 py-20">

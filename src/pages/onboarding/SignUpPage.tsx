@@ -1,38 +1,40 @@
 import { useState, type FormEvent } from "react";
+import { useNavigate } from "react-router";
 
+import { ApiError } from "@/api/client";
 import { PasswordField } from "@/components/PasswordField";
 import { TextField } from "@/components/TextField";
+import { useSignUp } from "@/hooks/useAuth";
 
 import {
   OnboardingButton,
+  OnboardingError,
   OnboardingHeading,
   OnboardingLink,
   OnboardingScreen,
 } from "./OnboardingScreen";
-import { isMobileNumber } from "./phoneNumber";
+import { validatePhoneNumber } from "./phoneNumber";
 
 export function SignUpPage() {
-  const [values, setValues] = useState({ phone: "", password: "", confirmation: "" });
-  const [submitted, setSubmitted] = useState(false);
-  const ready = Boolean(values.phone.trim() && values.password && values.confirmation);
-  const phoneError =
-    submitted && !isMobileNumber(values.phone)
-      ? "010으로 시작하는 휴대폰 번호 11자리를 입력해 주세요."
-      : undefined;
-  const confirmationError =
-    submitted && values.password !== values.confirmation
-      ? "비밀번호가 일치하지 않아요."
-      : undefined;
-  const validated = submitted && !phoneError && !confirmationError;
-
-  function change(field: keyof typeof values, value: string) {
-    setValues((current) => ({ ...current, [field]: value }));
-    setSubmitted(false);
-  }
+  const navigate = useNavigate();
+  const signup = useSignUp();
+  const [phoneError, setPhoneError] = useState("");
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (ready) setSubmitted(true);
+    if (signup.isPending) return;
+
+    const values = new FormData(event.currentTarget);
+    const phoneNumber = String(values.get("phone") ?? "");
+    const password = String(values.get("password") ?? "");
+    const nextPhoneError = validatePhoneNumber(phoneNumber);
+    setPhoneError(nextPhoneError);
+    if (nextPhoneError) return;
+
+    signup.mutate(
+      { phoneNumber, password },
+      { onSuccess: () => navigate("/onboarding", { replace: true }) },
+    );
   }
 
   return (
@@ -43,9 +45,9 @@ export function SignUpPage() {
           className="disabled:text-text-gray-darker"
           form="sign-up"
           type="submit"
-          disabled={!ready}
+          disabled={signup.isPending}
         >
-          가입하기
+          {signup.isPending ? "가입 중…" : "가입하기"}
         </OnboardingButton>
       }
     >
@@ -58,17 +60,27 @@ export function SignUpPage() {
           </>
         }
       />
-      <form id="sign-up" onSubmit={submit} noValidate className="mt-1 grid gap-6">
+      <form
+        id="sign-up"
+        onSubmit={submit}
+        noValidate
+        aria-busy={signup.isPending}
+        className="mt-1 grid gap-6"
+      >
         <TextField
           type="tel"
+          inputMode="numeric"
+          maxLength={11}
           name="phone"
           label="휴대폰 번호"
           autoComplete="username"
           placeholder="휴대폰 번호를 입력해 주세요."
-          aria-required="true"
-          value={values.phone}
-          onChange={(event) => change("phone", event.target.value)}
+          readOnly={signup.isPending}
           error={phoneError}
+          onChange={() => {
+            setPhoneError("");
+            signup.reset();
+          }}
           className="rounded-sm border-border-grey text-label-l"
         />
         <PasswordField
@@ -76,31 +88,21 @@ export function SignUpPage() {
           label="비밀번호"
           autoComplete="new-password"
           placeholder="비밀번호를 입력해 주세요."
-          aria-required="true"
-          value={values.password}
-          onChange={(event) => change("password", event.target.value)}
+          readOnly={signup.isPending}
+          onChange={() => signup.reset()}
           className="rounded-sm border-border-grey text-label-l"
         />
-        <PasswordField
-          name="confirmation"
-          label="비밀번호 확인"
-          autoComplete="new-password"
-          placeholder="비밀번호를 다시 입력해 주세요."
-          aria-required="true"
-          value={values.confirmation}
-          onChange={(event) => change("confirmation", event.target.value)}
-          error={confirmationError}
-          className="rounded-sm border-border-grey text-label-l"
-        />
-        <div aria-live="polite" className="text-caption text-text-gray-darker">
-          {validated && (
-            <>
-              <p>입력 내용을 확인했어요. 계정 생성은 준비 중이에요.</p>
-              <OnboardingLink to="/" className="mt-2 inline-block text-caption text-button-primary">
-                로그인으로 돌아가기
-              </OnboardingLink>
-            </>
+        <div>
+          {signup.isError && (
+            <OnboardingError>
+              {signup.error instanceof ApiError && signup.error.code === "CONFLICT"
+                ? "이미 가입한 휴대폰 번호예요. 로그인해 주세요."
+                : "가입하지 못했어요. 잠시 후 다시 시도해 주세요."}
+            </OnboardingError>
           )}
+          <OnboardingLink to="/" className="inline-block text-caption text-button-primary">
+            로그인으로 돌아가기
+          </OnboardingLink>
         </div>
       </form>
     </OnboardingScreen>

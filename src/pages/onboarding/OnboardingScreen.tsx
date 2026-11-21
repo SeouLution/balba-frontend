@@ -75,7 +75,7 @@ export function OnboardingScreen({
             <ol className="mt-10 grid gap-5 text-subtitle font-bold">
               {progressSteps.map(({ label, details, optional }, index) => {
                 const position = index + 1;
-                const isDone = completed || position < currentStep || (optional && receiptAttached);
+                const isDone = optional ? receiptAttached : completed || position < currentStep;
                 const isCurrent = !isDone && position === currentStep;
                 const isDeferred = optional && !receiptAttached && position < currentStep;
                 return (
@@ -221,7 +221,9 @@ export function OnboardingHeading({
 }) {
   return (
     <div className={cn("mb-5 grid gap-2", className)}>
-      <h1 className="text-[20px]/7 break-keep max-md:font-medium md:text-title">{title}</h1>
+      <h1 className="text-[20px]/7 break-keep max-md:font-medium md:text-title md:font-semibold">
+        {title}
+      </h1>
       {children && <p className="text-body-s text-text-gray-darker">{children}</p>}
     </div>
   );

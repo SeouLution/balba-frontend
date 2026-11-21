@@ -1,10 +1,12 @@
 import { useRef, useState, type DragEvent } from "react";
 import { useNavigate } from "react-router";
 
+import { ApiError } from "@/api/client";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { FilePickerInput } from "@/components/FilePickerInput";
 import { ArrowUpFromLine } from "@/components/icons";
+import { useCreateSalesImport } from "@/hooks/useSalesImport";
 import { cn } from "@/utils/cn";
 
 import fileIcon from "./assets/file.svg";
@@ -20,24 +22,33 @@ import {
 
 export function SalesUploadPage() {
   const navigate = useNavigate();
-  const { fileName, selectFile, setSalesConfirmed } = useOnboarding();
+  const { store, salesUpload, setSalesUpload, salesConfirmed } = useOnboarding();
+  const upload = useCreateSalesImport(store?.id ?? "");
   const input = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File>();
   const [fileError, setFileError] = useState("");
   const [dragging, setDragging] = useState(false);
+  const fileName = file?.name ?? salesUpload?.fileName;
 
   function chooseFile(selected?: File) {
-    if (!selected) return;
+    if (!selected || upload.isPending) return;
+    upload.reset();
     if (!/\.(xlsx|xls|csv)$/i.test(selected.name)) {
       setFileError(".xlsx, .xls, .csv 파일을 골라주세요.");
       return;
     }
+    if (!selected.size) {
+      setFileError("파일이 비어 있어요. 판매 기록이 들어 있는 파일을 골라주세요.");
+      return;
+    }
     setFileError("");
-    selectFile(selected.name);
+    setFile(selected);
   }
 
   function drop(event: DragEvent<HTMLButtonElement>) {
     event.preventDefault();
     setDragging(false);
+    if (upload.isPending) return;
     if (event.dataTransfer.files.length > 1) {
       setFileError("판매 파일을 한 번에 하나씩 올려주세요.");
       return;
@@ -45,21 +56,37 @@ export function SalesUploadPage() {
     chooseFile(event.dataTransfer.files[0]);
   }
 
+  function submit() {
+    if (!store || fileError || upload.isPending) return;
+    if (!file) {
+      if (salesUpload) navigate("../columns");
+      return;
+    }
+    upload.mutate(file, {
+      onSuccess: ({ id }) => {
+        setSalesUpload({ id, fileName: file.name });
+        navigate("../columns");
+      },
+    });
+  }
+
   return (
     <OnboardingScreen
       step={2}
-      onBack={() => navigate("../store")}
+      onBack={upload.isPending ? undefined : () => navigate("../store")}
       footer={
         <>
           <OnboardingButton
-            disabled={!fileName || !!fileError}
-            onClick={() => navigate("../columns")}
+            disabled={!fileName || !!fileError || upload.isPending}
+            onClick={submit}
           >
-            다음
+            {upload.isPending ? "파일 올리는 중…" : "다음"}
           </OnboardingButton>
-          <OnboardingLink to="../complete" onClick={() => setSalesConfirmed(false)}>
-            엑셀이 없어요 · 나중에 올리기
-          </OnboardingLink>
+          {!upload.isPending && !salesConfirmed && (
+            <OnboardingLink to="../complete" onClick={() => setSalesUpload(null)}>
+              엑셀이 없어요 · 나중에 올리기
+            </OnboardingLink>
+          )}
         </>
       }
     >
@@ -80,6 +107,7 @@ export function SalesUploadPage() {
       />
       <Button
         variant="plain"
+        disabled={upload.isPending}
         onClick={() => input.current?.click()}
         onDragOver={(event) => {
           event.preventDefault();
@@ -120,19 +148,14 @@ export function SalesUploadPage() {
           엑셀이 POS 컴퓨터에 있다면 파일을 이 기기로 옮겨 올려주세요.
         </p>
       </div>
-      <Button
-        variant="plain"
-        onClick={() => {
-          setFileError("");
-          selectFile("행복분식_매출.xlsx");
-        }}
-        className="mt-2 min-h-11 self-start text-caption text-text-gray-darker underline underline-offset-2"
-      >
-        예시 파일 선택
-      </Button>
-      {fileError && (
+      {(fileError || upload.isError) && (
         <div className="mt-4">
-          <OnboardingError>{fileError}</OnboardingError>
+          <OnboardingError>
+            {fileError ||
+              (upload.error instanceof ApiError && upload.error.status === 422
+                ? "파일을 읽을 수 없어요. 파일 형식과 내용을 확인해 주세요."
+                : "파일을 올리지 못했어요. 잠시 후 다시 시도해 주세요.")}
+          </OnboardingError>
         </div>
       )}
     </OnboardingScreen>

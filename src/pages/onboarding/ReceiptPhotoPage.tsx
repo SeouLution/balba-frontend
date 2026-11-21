@@ -1,17 +1,17 @@
-import { useRef } from "react";
 import { useLocation, useNavigate } from "react-router";
 
 import { InfoBox } from "@/components/InfoBox";
 import { TopBar } from "@/components/TopBar";
+import { ReceiptFlowPage } from "@/pages/ingredients/ReceiptFlowPage";
 
 import { useOnboarding } from "./onboardingContext";
 import { OnboardingButton, OnboardingHeading, OnboardingScreen } from "./OnboardingScreen";
 
 export function ReceiptPhotoPage() {
   const navigate = useNavigate();
-  const fileInput = useRef<HTMLInputElement>(null);
-  const { receiptPhotoCount, addReceiptPhotos, salesConfirmed } = useOnboarding();
-  const fromCompletion = useLocation().state?.fromCompletion === true;
+  const { store, receiptPhotoCount, addReceiptPhotos, salesConfirmed } = useOnboarding();
+  const { state } = useLocation();
+  const fromCompletion = state?.fromCompletion === true;
 
   function leaveReceipt(path: string) {
     if (fromCompletion) {
@@ -19,6 +19,19 @@ export function ReceiptPhotoPage() {
       return;
     }
     navigate(path);
+  }
+
+  if (store && state?.isCapturingReceipt === true) {
+    return (
+      <ReceiptFlowPage
+        storeId={store.id}
+        onBack={() => navigate(-1)}
+        onSaved={(photoCount) => {
+          addReceiptPhotos(photoCount);
+          navigate(-1);
+        }}
+      />
+    );
   }
 
   return (
@@ -58,19 +71,14 @@ export function ReceiptPhotoPage() {
       </OnboardingHeading>
       <div className="grid gap-4">
         <div className="grid gap-2.5 rounded-md bg-surface-receipt-action px-5 py-6 text-center">
-          <FilePickerInput
-            ref={fileInput}
-            accept="image/*"
-            capture="environment"
-            multiple
-            onFilesChange={(files) => addReceiptPhotos(files.length)}
-          />
-          <OnboardingButton onClick={() => fileInput.current?.click()}>
+          <OnboardingButton
+            onClick={() => navigate(".", { state: { fromCompletion, isCapturingReceipt: true } })}
+          >
             영수증 사진 찍기
           </OnboardingButton>
           <p role="status" className="text-body-s text-text-information">
             {receiptPhotoCount > 0
-              ? `영수증 사진 ${receiptPhotoCount}장을 선택했어요`
+              ? "거래처 영수증을 반영했어요"
               : "여러 장 연속 촬영으로 이어져요"}
           </p>
         </div>
@@ -91,4 +99,3 @@ export function ReceiptPhotoPage() {
     </OnboardingScreen>
   );
 }
-import { FilePickerInput } from "@/components/FilePickerInput";

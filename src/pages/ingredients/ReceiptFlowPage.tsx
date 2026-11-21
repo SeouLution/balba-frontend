@@ -1,14 +1,20 @@
 import { useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 
-import { useStoreId } from "@/hooks/useStoreId";
+import { useOptionalStoreId } from "@/hooks/useStoreId";
 
 import { CaptureStep } from "./CaptureStep";
 import { ReceiptReviewStep } from "./ReceiptReviewStep";
 
 const DEFAULT_RETURN_PATH = "/ingredients";
 
-type ReceiptFlowStep = { name: "capture" } | { name: "review"; scanId: string };
+type ReceiptFlowStep = { name: "capture" } | { name: "review"; scanId: string; photoCount: number };
+
+type ReceiptFlowPageProps = {
+  storeId?: string;
+  onBack?: () => void;
+  onSaved?: (photoCount: number) => void;
+};
 
 /** 돌아간 화면이 읽는 값. 재료 탭은 이걸로 "정보가 입력됐어요" 카드를 띄운다. */
 export type ReceiptFlowResult = {
@@ -16,12 +22,15 @@ export type ReceiptFlowResult = {
 };
 
 /** 영수증 연속 촬영 → 읽기 · 저장. 진입: /receipt?returnTo=돌아갈경로 */
-export function ReceiptFlowPage() {
+export function ReceiptFlowPage({ storeId: entryStoreId, onBack, onSaved }: ReceiptFlowPageProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const storeId = useStoreId();
+  // 온보딩은 storeId를 직접 넘기고, 재료 탭은 RequireStore가 준 값을 쓴다.
+  const currentStoreId = useOptionalStoreId();
+  const storeId = entryStoreId ?? currentStoreId;
   const [step, setStep] = useState<ReceiptFlowStep>({ name: "capture" });
+  if (!storeId) throw new Error("ReceiptFlowPage에는 가게 id가 필요해요.");
 
   function finishFlow(ingredientNames: string[]) {
     const result: ReceiptFlowResult = { receiptIngredientNames: ingredientNames };
@@ -43,8 +52,8 @@ export function ReceiptFlowPage() {
     return (
       <CaptureStep
         storeId={storeId}
-        onBack={leaveFlow}
-        onUploaded={(scanId) => setStep({ name: "review", scanId })}
+        onBack={onBack ?? leaveFlow}
+        onUploaded={(scanId, photoCount) => setStep({ name: "review", scanId, photoCount })}
       />
     );
   }
@@ -54,7 +63,7 @@ export function ReceiptFlowPage() {
       storeId={storeId}
       scanId={step.scanId}
       onBack={() => setStep({ name: "capture" })}
-      onConfirmed={finishFlow}
+      onConfirmed={onSaved ? () => onSaved(step.photoCount) : finishFlow}
     />
   );
 }

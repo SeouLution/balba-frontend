@@ -19,10 +19,7 @@ export function OnboardingStartPage() {
     <OnboardingScreen
       onBack={() => navigate("/")}
       footer={
-        <>
-          <OnboardingButton onClick={() => navigate("store")}>내 가게로 시작하기</OnboardingButton>
-          <OnboardingButton secondary>먼저 둘러볼게요</OnboardingButton>
-        </>
+        <OnboardingButton onClick={() => navigate("store")}>내 가게로 시작하기</OnboardingButton>
       }
     >
       <OnboardingHeading
