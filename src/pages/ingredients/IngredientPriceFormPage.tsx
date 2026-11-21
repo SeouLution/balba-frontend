@@ -1,16 +1,14 @@
 import { useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 
-import type { IngredientSummary, IngredientUnit } from "@/api/ingredients";
+import type { IngredientSummary } from "@/api/ingredients";
 import { Button, DropdownOption, Select, TextField } from "@/components";
 import { Loading } from "@/components/Loading";
 import { useToast } from "@/components/toast/useToast";
-import { useIngredients } from "@/hooks/useIngredients";
+import { useCreatePurchase, useIngredients } from "@/hooks/useIngredients";
 import { useStoreId } from "@/hooks/useStoreId";
 
 import { ReceiptStepLayout } from "./ReceiptStepLayout";
-
-const UNITS: IngredientUnit[] = ["개", "g"];
 
 /**
  * 재료 금액 직접 입력(?mode=new) · 재료 수정(?mode=edit).
@@ -48,22 +46,35 @@ export function IngredientPriceFormPage() {
     );
   }
 
-  return <PriceForm key={ingredient.id} title={title} ingredient={ingredient} onDone={goBack} />;
+  return (
+    <PriceForm
+      key={ingredient.id}
+      storeId={storeId}
+      title={title}
+      ingredient={ingredient}
+      onDone={goBack}
+    />
+  );
 }
 
 type PriceFormProps = {
+  storeId: string;
   title: string;
   ingredient: IngredientSummary;
   onDone: () => void;
 };
 
-function PriceForm({ title, ingredient, onDone }: PriceFormProps) {
+function toIsoDate(year: number, month: number, day: number) {
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function PriceForm({ storeId, title, ingredient, onDone }: PriceFormProps) {
   const showToast = useToast();
+  const createPurchase = useCreatePurchase(storeId);
   const today = new Date();
-  const [name, setName] = useState(ingredient.name);
-  const [unit, setUnit] = useState<IngredientUnit>(ingredient.unit);
   // 응답의 단가는 1개 · 1g당 값이라 산 금액(예: 20,000원)으로 되돌릴 수 없어 비워 둔다.
   const [amount, setAmount] = useState("");
+  const [quantity, setQuantity] = useState("");
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
   const [day, setDay] = useState(today.getDate());
@@ -71,11 +82,24 @@ function PriceForm({ title, ingredient, onDone }: PriceFormProps) {
   const formattedAmount = amount === "" ? "" : Number(amount).toLocaleString("ko-KR");
   const daysInMonth = new Date(year, month, 0).getDate();
   const years = [today.getFullYear() - 1, today.getFullYear()];
+  const purchasedOn = toIsoDate(year, month, Math.min(day, daysInMonth));
+  // 서버는 미래 입고일을 받지 않는다.
+  const isFutureDate =
+    purchasedOn > toIsoDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
+  const canSave = Number(quantity) > 0 && !isFutureDate && !createPurchase.isPending;
 
   function handleSave() {
-    // TODO(api): 재료 이름 · 단위 · 산 금액 · 주문 날짜를 저장하는 API가 없다. 생기면 여기서 호출한다.
-    showToast("금액 저장 API가 아직 없어서 저장되지 않았어요");
-    onDone();
+    // TODO(api): 수기 입고는 수량 · 날짜만 받는다. 산 금액(단가)을 저장하는 API가 생기면 amount를 보낸다.
+    createPurchase.mutate(
+      { ingredientId: ingredient.id, purchasedOn, quantity: Number(quantity) },
+      {
+        onSuccess: () => {
+          showToast("입고 정보를 저장했어요");
+          onDone();
+        },
+        onError: () => showToast("저장하지 못했어요. 다시 눌러 주세요."),
+      },
+    );
   }
 
   return (
@@ -83,30 +107,13 @@ function PriceForm({ title, ingredient, onDone }: PriceFormProps) {
       title={title}
       onBack={onDone}
       footer={
-        <Button disabled={!name.trim() || amount === ""} onClick={handleSave} className="w-full">
-          저장
+        <Button disabled={!canSave} onClick={handleSave} className="w-full">
+          {createPurchase.isPending ? "저장하는 중…" : "저장"}
         </Button>
       }
     >
-      <div className="grid grid-cols-[1fr_6rem] items-end gap-2">
-        <TextField
-          label="재료 이름"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-        />
-        <Select
-          label="단위"
-          value={unit}
-          onChange={(event) => setUnit(event.target.value as IngredientUnit)}
-          className="pl-3"
-        >
-          {UNITS.map((each) => (
-            <DropdownOption key={each} value={each}>
-              {each}
-            </DropdownOption>
-          ))}
-        </Select>
-      </div>
+      {/* 재료 이름을 바꾸는 API가 없어 고를 재료를 보여주기만 한다. */}
+      <TextField label="재료 이름" readOnly value={ingredient.name} />
 
       <TextField
         label="금액"
@@ -129,13 +136,13 @@ function PriceForm({ title, ingredient, onDone }: PriceFormProps) {
       />
 
       <fieldset className="grid gap-2">
-        <legend className="mb-2 text-sm font-semibold text-form-ink">주문 날짜</legend>
+        <legend className="mb-2 text-sm font-semibold text-form-ink">입고 날짜</legend>
         <div className="grid grid-cols-[1.4fr_1fr_1fr] gap-2">
           <Select
             label={<span className="sr-only">년</span>}
             value={year}
             onChange={(event) => setYear(Number(event.target.value))}
-            className="form-select-scroll pl-3"
+            className="form-select-scroll pl-3 whitespace-nowrap"
           >
             {years.map((each) => (
               <DropdownOption key={each} value={each}>
@@ -151,7 +158,7 @@ function PriceForm({ title, ingredient, onDone }: PriceFormProps) {
               setMonth(nextMonth);
               setDay((current) => Math.min(current, new Date(year, nextMonth, 0).getDate()));
             }}
-            className="form-select-scroll pl-3"
+            className="form-select-scroll pl-3 whitespace-nowrap"
           >
             {Array.from({ length: 12 }, (_, index) => index + 1).map((each) => (
               <DropdownOption key={each} value={each}>
@@ -163,7 +170,7 @@ function PriceForm({ title, ingredient, onDone }: PriceFormProps) {
             label={<span className="sr-only">일</span>}
             value={Math.min(day, daysInMonth)}
             onChange={(event) => setDay(Number(event.target.value))}
-            className="form-select-scroll pl-3"
+            className="form-select-scroll pl-3 whitespace-nowrap"
           >
             {Array.from({ length: daysInMonth }, (_, index) => index + 1).map((each) => (
               <DropdownOption key={each} value={each}>
@@ -172,7 +179,22 @@ function PriceForm({ title, ingredient, onDone }: PriceFormProps) {
             ))}
           </Select>
         </div>
+        {isFutureDate && (
+          <p className="text-caption text-danger-subtle-text">오늘 이후 날짜는 고를 수 없어요.</p>
+        )}
       </fieldset>
+
+      <div className="grid grid-cols-[1fr_7rem] items-end gap-2">
+        <TextField
+          label="수량"
+          inputMode="decimal"
+          placeholder="재료의 수량을 입력해 주세요."
+          value={quantity}
+          onChange={(event) => setQuantity(event.target.value.replace(/[^0-9.]/g, ""))}
+        />
+        {/* 재료 단위(개 · g)는 서버가 정해서 고를 수 없다. */}
+        <TextField label="단위" readOnly value={ingredient.unit} />
+      </div>
     </ReceiptStepLayout>
   );
 }
