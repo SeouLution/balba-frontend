@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import { Button } from "@/components";
 import { AppTabBar } from "@/components/AppTabBar";
@@ -11,6 +11,7 @@ import { DeadlineChip } from "./DeadlineChip";
 import { ForecastCard } from "./ForecastCard";
 import { HomeBanners } from "./HomeBanners";
 import { formatMonthDayWeekday } from "./homeFormat";
+import { NearbyEventsSheet } from "./NearbyEventsSheet";
 import { NextOrderNotice, OrderSummaryCard, ReceiptPromptCard } from "./OrderCards";
 import { WeatherRow } from "./WeatherRow";
 
@@ -18,6 +19,7 @@ import { WeatherRow } from "./WeatherRow";
 export function HomePage() {
   const storeId = useStoreId();
   const homeQuery = useHome(storeId);
+  const [isEventsOpen, setIsEventsOpen] = useState(false);
 
   if (homeQuery.isPending) {
     return (
@@ -43,6 +45,7 @@ export function HomePage() {
   const home = homeQuery.data;
   const isTomorrow = home.view === "TOMORROW";
   const order = home.order ?? null;
+  const events = home.tiles.events ?? [];
   // TODO(api): order가 null이면 "거래처가 없음(영수증 건너뜀)"과 "오늘 주문할 곳이 없음"을 구분할 수 없다.
   //            지금은 둘 다 영수증 안내를 보여준다. 백엔드에 구분 값을 요청해야 한다.
   const needsReceipt = isTomorrow && (order === null || order.estimatedTotal === null);
@@ -69,7 +72,12 @@ export function HomePage() {
         </h1>
       )}
 
-      {home.tiles.weather && <WeatherRow view={home.view} weather={home.tiles.weather} />}
+      <WeatherRow
+        view={home.view}
+        weather={home.tiles.weather}
+        eventCount={events.length}
+        onEventsClick={() => setIsEventsOpen(true)}
+      />
 
       <HomeBanners
         // 날짜가 바뀌면 닫은 배너 기록을 새 날짜 것으로 다시 읽는다.
@@ -84,6 +92,15 @@ export function HomePage() {
       {needsReceipt && <ReceiptPromptCard />}
       {isTomorrow && order && <OrderSummaryCard targetDate={home.targetDate} order={order} />}
       {!isTomorrow && <NextOrderNotice targetDate={home.targetDate} />}
+
+      {isEventsOpen && (
+        <NearbyEventsSheet
+          view={home.view}
+          targetDate={home.targetDate}
+          events={events}
+          onClose={() => setIsEventsOpen(false)}
+        />
+      )}
     </HomeLayout>
   );
 }
