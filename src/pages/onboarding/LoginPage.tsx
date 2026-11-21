@@ -1,40 +1,49 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
 
-import { Checkbox } from "@/components/Checkbox";
+import { ApiError } from "@/api/client";
 import { LogoMark } from "@/components/icons";
 import { PasswordField } from "@/components/PasswordField";
 import { TextField } from "@/components/TextField";
+import { useLogIn } from "@/hooks/useAuth";
 
 import {
   OnboardingButton,
+  OnboardingError,
   OnboardingHeading,
   OnboardingLink,
   OnboardingScreen,
 } from "./OnboardingScreen";
-import { isMobileNumber } from "./phoneNumber";
+import { isMobileNumber, normalizePhoneNumber } from "./phoneNumber";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const login = useLogIn();
   const [phoneError, setPhoneError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [notice, setNotice] = useState("");
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (login.isPending) return;
+
     const values = new FormData(event.currentTarget);
-    const phone = String(values.get("phone") ?? "");
+    const phoneNumber = normalizePhoneNumber(String(values.get("phone") ?? ""));
     const password = String(values.get("password") ?? "");
-    const nextPhoneError = isMobileNumber(phone)
+    const nextPhoneError = isMobileNumber(phoneNumber)
       ? ""
-      : "010으로 시작하는 휴대폰 번호 11자리를 입력해 주세요.";
-    const nextPasswordError = password ? "" : "비밀번호를 입력해 주세요.";
+      : "01로 시작하는 휴대폰 번호 10~11자리를 입력해 주세요.";
+    const passwordLength = Array.from(password).length;
+    const nextPasswordError =
+      passwordLength >= 8 && passwordLength <= 128 ? "" : "비밀번호를 8~128자로 입력해 주세요.";
     setPhoneError(nextPhoneError);
     setPasswordError(nextPasswordError);
-    setNotice(
-      nextPhoneError || nextPasswordError
-        ? ""
-        : "계정 로그인은 준비 중이에요. 시연용 로그인으로 시작할 수 있어요.",
+    if (nextPhoneError || nextPasswordError) return;
+
+    login.mutate(
+      { phoneNumber, password },
+      {
+        onSuccess: ({ storeId }) => navigate(storeId ? "/home" : "/onboarding", { replace: true }),
+      },
     );
   }
 
@@ -48,14 +57,9 @@ export function LoginPage() {
         </header>
       }
       footer={
-        <>
-          <OnboardingButton form="login" type="submit">
-            로그인
-          </OnboardingButton>
-          <OnboardingButton secondary onClick={() => navigate("/onboarding")}>
-            시연용 로그인
-          </OnboardingButton>
-        </>
+        <OnboardingButton form="login" type="submit" disabled={login.isPending}>
+          {login.isPending ? "로그인 중…" : "로그인"}
+        </OnboardingButton>
       }
     >
       <OnboardingHeading
@@ -67,7 +71,7 @@ export function LoginPage() {
           </>
         }
       />
-      <form id="login" onSubmit={submit} noValidate>
+      <form id="login" onSubmit={submit} noValidate aria-busy={login.isPending}>
         <div className="grid gap-6">
           <TextField
             type="tel"
@@ -76,10 +80,11 @@ export function LoginPage() {
             autoComplete="username"
             placeholder="휴대폰 번호를 입력해 주세요."
             required
+            readOnly={login.isPending}
             error={phoneError || undefined}
             onChange={() => {
               setPhoneError("");
-              setNotice("");
+              login.reset();
             }}
             className="rounded-sm border-border-grey text-label-l"
           />
@@ -89,16 +94,16 @@ export function LoginPage() {
             autoComplete="current-password"
             placeholder="비밀번호를 입력해 주세요."
             required
+            readOnly={login.isPending}
             error={passwordError || undefined}
             onChange={() => {
               setPasswordError("");
-              setNotice("");
+              login.reset();
             }}
             className="rounded-sm border-border-grey text-label-l"
           />
         </div>
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3">
-          <Checkbox label="로그인 상태 유지" defaultChecked className="gap-3 text-label-s" />
+        <div className="mt-2 flex justify-end">
           <OnboardingLink
             to="/signup"
             className="inline-flex min-h-11 items-center rounded-sm text-label-s text-text-gray underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-button-primary focus-visible:outline-none"
@@ -106,9 +111,13 @@ export function LoginPage() {
             회원가입하기
           </OnboardingLink>
         </div>
-        <p role="status" className="mt-2 text-caption text-text-gray-darker">
-          {notice}
-        </p>
+        {login.isError && (
+          <OnboardingError>
+            {login.error instanceof ApiError && login.error.code === "UNAUTHORIZED"
+              ? "휴대폰 번호 또는 비밀번호가 올바르지 않아요."
+              : "로그인하지 못했어요. 잠시 후 다시 시도해 주세요."}
+          </OnboardingError>
+        )}
       </form>
     </OnboardingScreen>
   );

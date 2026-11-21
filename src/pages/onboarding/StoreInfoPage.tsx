@@ -1,16 +1,23 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
 
+import { ApiError } from "@/api/client";
+import type { StoreCategory } from "@/api/stores";
 import { Button } from "@/components/Button";
 import { Chip } from "@/components/Chip";
 import { ChevronRight } from "@/components/icons";
 import { TextField } from "@/components/TextField";
+import { useCreateStore } from "@/hooks/useCreateStore";
 
-import { describeHours } from "./businessHours";
+import { describeHours, toBusinessHours } from "./businessHours";
 import { BusinessHoursDialog } from "./BusinessHoursDialog";
 import { useOnboarding } from "./onboardingContext";
-import { OnboardingButton, OnboardingHeading, OnboardingScreen } from "./OnboardingScreen";
-import type { StoreCategory } from "./onboardingTypes";
+import {
+  OnboardingButton,
+  OnboardingError,
+  OnboardingHeading,
+  OnboardingScreen,
+} from "./OnboardingScreen";
 import { PostcodeSearch } from "./PostcodeSearch";
 
 const categories: { value: StoreCategory; label: string }[] = [
@@ -24,7 +31,8 @@ const categories: { value: StoreCategory; label: string }[] = [
 
 export function StoreInfoPage() {
   const navigate = useNavigate();
-  const { draft, updateDraft } = useOnboarding();
+  const { draft, updateDraft, store, setStore } = useOnboarding();
+  const createStore = useCreateStore();
   const [showAddress, setShowAddress] = useState(false);
   const [showHours, setShowHours] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -42,17 +50,43 @@ export function StoreInfoPage() {
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitted(true);
-    if (!draft.name.trim() || !draft.roadAddress) return;
-    navigate("../upload");
+    if (createStore.isPending || !draft.name.trim() || !draft.roadAddress) return;
+    createStore.mutate(
+      {
+        name: draft.name.trim(),
+        category: draft.category,
+        // TODO(api): 상세주소를 저장할 필드가 공개 계약에 없다.
+        address: { roadAddress: draft.roadAddress },
+        businessHours: toBusinessHours(draft.hours),
+      },
+      {
+        onSuccess: (savedStore) => {
+          setStore(savedStore);
+          navigate("../upload");
+        },
+      },
+    );
+  }
+
+  if (store) {
+    return (
+      <OnboardingScreen
+        step={1}
+        onBack={() => navigate("/onboarding")}
+        footer={<OnboardingButton onClick={() => navigate("../upload")}>다음</OnboardingButton>}
+      >
+        <OnboardingHeading title="가게 정보를 저장했어요">{store.name}</OnboardingHeading>
+      </OnboardingScreen>
+    );
   }
 
   return (
     <OnboardingScreen
       step={1}
-      onBack={() => navigate("/onboarding")}
+      onBack={createStore.isPending ? undefined : () => navigate("/onboarding")}
       footer={
-        <OnboardingButton form="store-info" type="submit">
-          다음
+        <OnboardingButton form="store-info" type="submit" disabled={createStore.isPending}>
+          {createStore.isPending ? "가게 정보 저장 중…" : "다음"}
         </OnboardingButton>
       }
     >
@@ -60,7 +94,13 @@ export function StoreInfoPage() {
         주소는 그 동네 날씨와 <br className="md:hidden" />
         근처 행사를 가져오는 데만 써요
       </OnboardingHeading>
-      <form id="store-info" noValidate onSubmit={submit} className="grid gap-5">
+      <form
+        id="store-info"
+        noValidate
+        onSubmit={submit}
+        inert={createStore.isPending}
+        className="grid gap-5"
+      >
         <TextField
           label="가게 이름"
           required
@@ -136,6 +176,13 @@ export function StoreInfoPage() {
             </span>
           </Button>
         </div>
+        {createStore.isError && (
+          <OnboardingError>
+            {createStore.error instanceof ApiError && createStore.error.status === 401
+              ? "로그인이 만료됐어요. 다시 로그인해 주세요."
+              : "가게 정보를 저장하지 못했어요. 입력을 확인하고 다시 시도해 주세요."}
+          </OnboardingError>
+        )}
       </form>
       {showAddress && (
         <PostcodeSearch onClose={() => setShowAddress(false)} onSelect={selectAddress} />

@@ -1,4 +1,4 @@
-import type { DayHours, DayOfWeek } from "./onboardingTypes";
+import type { DayHours, DayOfWeek } from "@/api/stores";
 
 export const WEEKDAYS: { day: DayOfWeek; label: string }[] = [
   { day: "MON", label: "월" },

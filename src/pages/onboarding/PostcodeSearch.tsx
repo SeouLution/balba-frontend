@@ -1,17 +1,10 @@
 import { useState, type FormEvent } from "react";
 
-import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
-import { Search } from "@/components/icons";
 import { TextField } from "@/components/TextField";
+import { usePostcodeSearch } from "@/hooks/usePostcodeSearch";
 
-import { OnboardingButton, OnboardingDialog } from "./OnboardingScreen";
-
-const exampleAddresses = [
-  { postcode: "04001", road: "서울 마포구 망원로 61", lot: "서울 마포구 망원동 416-2" },
-  { postcode: "04002", road: "서울 마포구 망원로 74 (망원빌딩)", lot: "서울 마포구 망원동 395-8" },
-  { postcode: "04004", road: "서울 마포구 망원로 96", lot: "서울 마포구 망원동 382-1" },
-];
+import { OnboardingButton, OnboardingDialog, OnboardingError } from "./OnboardingScreen";
 
 type PostcodeSearchProps = {
   onClose: () => void;
@@ -19,16 +12,9 @@ type PostcodeSearchProps = {
 };
 
 export function PostcodeSearch({ onClose, onSelect }: PostcodeSearchProps) {
-  const [keyword, setKeyword] = useState("");
-  const [query, setQuery] = useState("");
   const [manual, setManual] = useState(false);
   const [postcode, setPostcode] = useState("");
   const [address, setAddress] = useState("");
-  const results = query
-    ? exampleAddresses.filter(({ postcode, road, lot }) =>
-        query.split(/\s+/).every((word) => `${postcode} ${road} ${lot}`.includes(word)),
-      )
-    : [];
 
   function confirmAddress(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -65,66 +51,7 @@ export function PostcodeSearch({ onClose, onSelect }: PostcodeSearchProps) {
         </form>
       ) : (
         <>
-          <form
-            role="search"
-            onSubmit={(event) => {
-              event.preventDefault();
-              setQuery(keyword.trim());
-            }}
-            className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2"
-          >
-            <TextField
-              label="도로명 또는 지번"
-              hideLabel
-              placeholder="예: 망원로"
-              value={keyword}
-              onChange={(event) => setKeyword(event.target.value)}
-              className="rounded-sm border-border-primary"
-            />
-            <OnboardingButton type="submit">
-              <Search size={16} aria-hidden /> 검색
-            </OnboardingButton>
-          </form>
-          <p aria-live="polite" className="mt-4 text-caption text-text-gray-darker">
-            {query
-              ? `예시 검색 결과 ${results.length}건`
-              : "예시 주소는 ‘망원로’로 검색할 수 있어요."}
-          </p>
-          {results.length > 0 && (
-            <ul className="mt-1 divide-y divide-border-divider">
-              {results.map(({ postcode, road, lot }) => (
-                <li
-                  key={postcode}
-                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-2 py-4"
-                >
-                  <div className="grid gap-1">
-                    <span className="text-caption">{postcode}</span>
-                    <span className="flex items-start gap-2 text-body-m">
-                      <Badge className="h-auto rounded-sm bg-button-primary px-1.5 text-text-white">
-                        도로명
-                      </Badge>
-                      <span className="break-keep">{road}</span>
-                    </span>
-                    <span className="flex items-start gap-2 text-body-s text-text-gray-darker">
-                      <Badge className="h-auto rounded-sm px-1.5">지번</Badge>
-                      <span className="break-keep">{lot}</span>
-                    </span>
-                  </div>
-                  <OnboardingButton
-                    secondary
-                    aria-label={`선택: ${road}`}
-                    className="h-11! px-3 text-label-s-b whitespace-nowrap"
-                    onClick={() => onSelect(postcode, road)}
-                  >
-                    선택
-                  </OnboardingButton>
-                </li>
-              ))}
-            </ul>
-          )}
-          {query && !results.length && (
-            <p className="mt-3 text-body-s">일치하는 예시 주소가 없어요.</p>
-          )}
+          <PostcodeSearchFrame onSelect={onSelect} />
           <Button
             variant="plain"
             onClick={() => setManual(true)}
@@ -135,5 +62,26 @@ export function PostcodeSearch({ onClose, onSelect }: PostcodeSearchProps) {
         </>
       )}
     </OnboardingDialog>
+  );
+}
+
+function PostcodeSearchFrame({ onSelect }: Pick<PostcodeSearchProps, "onSelect">) {
+  const { container, status, selectionError } = usePostcodeSearch(onSelect);
+
+  return (
+    <>
+      {status === "loading" && (
+        <p role="status" className="text-body-s">
+          주소 검색을 불러오는 중이에요.
+        </p>
+      )}
+      {status === "error" && (
+        <OnboardingError>주소 검색을 불러오지 못했어요. 주소를 직접 입력해 주세요.</OnboardingError>
+      )}
+      {selectionError && (
+        <OnboardingError>도로명 주소를 선택하거나 직접 입력해 주세요.</OnboardingError>
+      )}
+      {status !== "error" && <div ref={container} className="h-[min(55dvh,420px)]" />}
+    </>
   );
 }

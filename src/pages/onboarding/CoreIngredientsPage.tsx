@@ -12,7 +12,6 @@ import { useOnboarding } from "./onboardingContext";
 import { OnboardingButton, OnboardingHeading, OnboardingScreen } from "./OnboardingScreen";
 import type { RecipeIngredient } from "./onboardingTypes";
 import { getRecipeIngredients } from "./recipeIngredients";
-import { exampleSales } from "./salesColumns";
 
 const previewLimit = 5;
 
@@ -100,18 +99,8 @@ export function CoreIngredientsPage() {
       onBack={() => navigate("../columns")}
       footer={<OnboardingButton onClick={confirmIngredients}>맞아요, 다음</OnboardingButton>}
     >
-      <OnboardingHeading
-        title={
-          <>
-            메뉴 {exampleSales.menuCount}에 들어가는
-            <br />
-            재료와 양을 추렸어요
-          </>
-        }
-      >
-        1인분에 들어가는 양이에요. 메뉴 이름만 보고 고른 거라 틀릴 수 있으니,
-        <br className="hidden md:block" />
-        다른 곳만 고쳐 주세요.
+      <OnboardingHeading title="메뉴별 재료와 양을 확인해 주세요">
+        아래 메뉴와 재료는 예시예요. 1인분에 들어가는 양을 고칠 수 있어요.
       </OnboardingHeading>
       <div className="grid gap-4 md:mt-5">
         {menus.map(({ name, items }) => (
