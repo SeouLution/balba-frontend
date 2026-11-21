@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import type { ForecastItem, Home } from "@/api/home";
-import { Stepper } from "@/components";
+import { Stepper, Toggle } from "@/components";
 import { Badge } from "@/components/Badge";
 import { ArrowDown, ArrowUp, ChevronDown } from "@/components/icons";
 import { useAdjustForecast } from "@/hooks/useHome";
@@ -93,12 +93,30 @@ function EditableForecastList({ storeId, home }: ForecastCardProps) {
             {isOpen && (
               <div id={panelId} className="mt-3 flex flex-col gap-3">
                 {item.summaryText && <ReasonBox>{item.summaryText}</ReasonBox>}
-                <Stepper
-                  label={`${item.menu.name} 준비량`}
-                  value={item.planned}
-                  unit={item.unit}
-                  onChange={(quantity) => adjustForecast.mutate({ menuId: item.menu.id, quantity })}
-                />
+                <div className="flex items-center justify-between gap-3">
+                  <Stepper
+                    label={`${item.menu.name} 준비량`}
+                    value={item.planned}
+                    unit={item.unit}
+                    disabled={isResting(item)}
+                    onChange={(quantity) =>
+                      adjustForecast.mutate({ menuId: item.menu.id, quantity })
+                    }
+                  />
+                  {/* 쉬는 메뉴는 준비량 0으로 저장한다. 다시 켜면 AI 추천량으로 돌린다. */}
+                  <Toggle
+                    aria-label={`${item.menu.name} 만들기`}
+                    checked={!isResting(item)}
+                    onChange={(event) =>
+                      adjustForecast.mutate({
+                        menuId: item.menu.id,
+                        quantity: event.target.checked ? item.recommended : 0,
+                      })
+                    }
+                    onLabel="만들어요"
+                    offLabel="쉬어요"
+                  />
+                </div>
               </div>
             )}
           </li>
@@ -136,7 +154,9 @@ function ForecastSummary({ item, view }: { item: ForecastItem; view: Home["view"
   return (
     <>
       <div className="flex-1">
-        <p className="text-label-l text-text-black">{item.menu.name}</p>
+        <p className={cn("text-label-l text-text-black", isResting(item) && "line-through")}>
+          {item.menu.name}
+        </p>
         {hint && (
           <p className="mt-1 flex items-center gap-1 text-caption text-text-gray-darker">
             {hint.direction === "up" && <ArrowUp size={14} strokeWidth={2.2} aria-hidden />}
@@ -145,7 +165,9 @@ function ForecastSummary({ item, view }: { item: ForecastItem; view: Home["view"
           </p>
         )}
       </div>
-      <span className="text-number text-text-black">{formatQuantity(item.planned, item.unit)}</span>
+      <span className="text-number text-text-black">
+        {isResting(item) ? "쉬어요" : formatQuantity(item.planned, item.unit)}
+      </span>
     </>
   );
 }
@@ -158,4 +180,9 @@ function ReasonBox({ className, children }: { className?: string; children: stri
       {children}
     </p>
   );
+}
+
+// 준비량 0 = 그날 쉬는 메뉴(따로 내려오는 값 없이 0으로 판단)
+function isResting(item: ForecastItem) {
+  return item.planned === 0;
 }
