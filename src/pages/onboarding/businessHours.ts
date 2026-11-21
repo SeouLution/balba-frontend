@@ -97,3 +97,37 @@ export function describeHours(hours: HoursDraft) {
   if (closed.length) parts.push(`${closed.join("·")} 휴무`);
   return parts.join(" · ");
 }
+
+/**
+ * 서버 영업시간 → 수정용 초안.
+ * 여는 날의 시간이 모두 같으면 "매일 같아요", 다르면 "요일마다 달라요"로 연다.
+ * 서버에 없는 요일은 쉬는 날로 본다.
+ */
+export function fromBusinessHours(days: DayHours[]): HoursDraft {
+  const byDay = new Map(days.map((item) => [item.day, item]));
+  const individual = { ...initialHours.individual };
+  const closed: DayOfWeek[] = [];
+
+  for (const { day } of WEEKDAYS) {
+    const item = byDay.get(day);
+    if (!item || item.closed || !item.open || !item.close) closed.push(day);
+    else individual[day] = { open: item.open, close: item.close };
+  }
+
+  const openRanges = WEEKDAYS.filter(({ day }) => !closed.includes(day)).map(
+    ({ day }) => individual[day],
+  );
+  const isSameEveryDay = openRanges.every(
+    (range) => range.open === openRanges[0].open && range.close === openRanges[0].close,
+  );
+  const daily = openRanges[0] ?? defaultRange;
+
+  return {
+    mode: isSameEveryDay ? "daily" : "individual",
+    daily,
+    weekday: daily,
+    weekend: daily,
+    individual,
+    closed,
+  };
+}
