@@ -181,11 +181,7 @@ function StoreForm({ storeId, store }: { storeId: string; store: Store }) {
             </span>
           </Button>
         </div>
-        <OnboardingButton
-          type="submit"
-          disabled={!isDirty || updateStore.isPending}
-          className="md:w-48 md:justify-self-end"
-        >
+        <OnboardingButton type="submit" disabled={!isDirty || updateStore.isPending}>
           {updateStore.isPending ? "수정하는 중…" : "수정하기"}
         </OnboardingButton>
       </form>
@@ -200,7 +196,7 @@ function StoreForm({ storeId, store }: { storeId: string; store: Store }) {
               onError: () => showToast("로그아웃하지 못했어요. 다시 눌러 주세요."),
             })
           }
-          className="w-full md:w-48"
+          className="w-full"
         >
           {logOut.isPending ? "로그아웃하는 중…" : "로그아웃"}
         </OnboardingButton>
