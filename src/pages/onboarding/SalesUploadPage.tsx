@@ -2,6 +2,8 @@ import { useRef, useState, type DragEvent } from "react";
 import { useNavigate } from "react-router";
 
 import { Badge } from "@/components/Badge";
+import { Button } from "@/components/Button";
+import { FilePickerInput } from "@/components/FilePickerInput";
 import { ArrowUpFromLine } from "@/components/icons";
 import { cn } from "@/utils/cn";
 
@@ -71,18 +73,13 @@ export function SalesUploadPage() {
       >
         최근 4주 이상이면 좋아요. 8주면 더 정확해요
       </OnboardingHeading>
-      <input
+      <FilePickerInput
         ref={input}
-        type="file"
         accept=".xlsx,.xls,.csv"
-        className="hidden"
-        onChange={(event) => {
-          chooseFile(event.target.files?.[0]);
-          event.target.value = "";
-        }}
+        onFilesChange={([file]) => chooseFile(file)}
       />
-      <button
-        type="button"
+      <Button
+        variant="plain"
         onClick={() => input.current?.click()}
         onDragOver={(event) => {
           event.preventDefault();
@@ -113,7 +110,7 @@ export function SalesUploadPage() {
             </span>
           </span>
         )}
-      </button>
+      </Button>
       <div className="mt-4 grid gap-1 rounded-md border border-border-grey p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-label-l">POS 컴퓨터에서 올리기</p>
@@ -123,8 +120,8 @@ export function SalesUploadPage() {
           엑셀이 POS 컴퓨터에 있다면 파일을 이 기기로 옮겨 올려주세요.
         </p>
       </div>
-      <button
-        type="button"
+      <Button
+        variant="plain"
         onClick={() => {
           setFileError("");
           selectFile("행복분식_매출.xlsx");
@@ -132,7 +129,7 @@ export function SalesUploadPage() {
         className="mt-2 min-h-11 self-start text-caption text-text-gray-darker underline underline-offset-2"
       >
         예시 파일 선택
-      </button>
+      </Button>
       {fileError && (
         <div className="mt-4">
           <OnboardingError>{fileError}</OnboardingError>

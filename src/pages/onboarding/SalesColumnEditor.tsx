@@ -1,7 +1,8 @@
 import { useState } from "react";
 
-import type { ColumnMapping } from "./onboardingTypes";
+import { Button } from "@/components/Button";
 import { ChevronDown } from "@/components/icons";
+import { InfoBox } from "@/components/InfoBox";
 
 import columnInfoIcon from "./assets/columnInfo.svg";
 import detectedIcon from "./assets/detected.svg";
@@ -11,6 +12,7 @@ import {
   OnboardingHeading,
   OnboardingScreen,
 } from "./OnboardingScreen";
+import type { ColumnMapping } from "./onboardingTypes";
 import { isCompleteMapping, salesColumns } from "./salesColumns";
 
 type SalesColumnEditorProps = {
@@ -58,9 +60,9 @@ export function SalesColumnEditor({
             <span id={`column-${key}`} className="text-label-s">
               {editLabel}
             </span>
-            <button
+            <Button
               id={`column-value-${key}`}
-              type="button"
+              variant="plain"
               aria-labelledby={`column-${key} column-value-${key}`}
               aria-haspopup="dialog"
               aria-expanded={openColumn === key}
@@ -70,7 +72,7 @@ export function SalesColumnEditor({
             >
               {mapping[key] ?? "칸 선택"}
               <ChevronDown size={16} aria-hidden />
-            </button>
+            </Button>
             {mapping[key] && mapping[key] === detected[key] && (
               <span className="flex items-center gap-1.5 text-label-s text-text-positive">
                 <img src={detectedIcon} alt="" />
@@ -79,10 +81,12 @@ export function SalesColumnEditor({
             )}
           </div>
         ))}
-        <div className="flex items-center gap-2 rounded-sm bg-button-subtle px-3 py-2.5 text-caption text-text-information">
-          <img src={columnInfoIcon} alt="" />
+        <InfoBox
+          icon={<img src={columnInfoIcon} alt="" />}
+          className="items-center gap-2 rounded-sm bg-button-subtle px-3 py-2.5 text-caption text-text-information"
+        >
           메뉴가 몇 개 팔렸는지 적힌 칸을 골라주세요.
-        </div>
+        </InfoBox>
       </div>
       {openColumn && (
         <OnboardingDialog
@@ -91,9 +95,9 @@ export function SalesColumnEditor({
         >
           <div className="grid gap-2">
             {options.map((option) => (
-              <button
+              <Button
                 key={option}
-                type="button"
+                variant="plain"
                 aria-pressed={mapping[openColumn] === option}
                 onClick={() => {
                   setMapping({ ...mapping, [openColumn]: option });
@@ -102,7 +106,7 @@ export function SalesColumnEditor({
                 className="min-h-11 rounded-sm px-3 py-2 text-left text-label-s hover:bg-button-subtle focus-visible:ring-2 focus-visible:ring-button-primary aria-pressed:bg-button-subtle"
               >
                 {option}
-              </button>
+              </Button>
             ))}
           </div>
         </OnboardingDialog>

@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
+import { Badge } from "@/components/Badge";
+import { Button } from "@/components/Button";
+import { IconButton } from "@/components/IconButton";
 import { Pen } from "@/components/icons";
 import { Stepper } from "@/components/Stepper";
 
@@ -36,38 +39,36 @@ function MenuIngredientsCard({
     <article className="grid gap-4 rounded-sm border border-button-subtle p-4">
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-subtitle font-bold text-text-gray-darker">{menu.name}</h2>
-        <button
-          type="button"
+        <IconButton
+          variant="plain"
           aria-label={`${menu.name} 재료 편집`}
           onClick={onEdit}
-          className="relative flex size-7.5 shrink-0 items-center justify-end rounded-sm text-text-gray-light hover:text-button-primary focus-visible:ring-2 focus-visible:ring-button-primary focus-visible:outline-none"
-        >
-          <Pen size={20} aria-hidden />
-        </button>
+          icon={<Pen size={20} />}
+          className="flex h-7.5 w-7.5 items-center justify-end rounded-sm text-text-gray-light hover:text-button-primary focus-visible:ring-2 focus-visible:ring-button-primary"
+        />
       </div>
       <ul className="grid grid-cols-2 gap-2 md:grid-cols-[repeat(3,minmax(0,146px))] md:gap-4">
         {visibleItems.map(({ name, amount, unit }) => (
-          <li
-            key={name}
-            className="flex min-h-10 flex-wrap items-center gap-x-2 rounded-sm bg-bg-page px-2.5 py-1.5 text-body-s md:text-body-l"
-          >
-            <span className="min-w-0 wrap-anywhere text-text-gray-light">{name}</span>
-            <span className="font-semibold whitespace-nowrap text-text-gray-darker">
-              {amounts[`${menu.name}/${name}`] ?? amount}
-              {units[`${menu.name}/${name}`] ?? unit}
-            </span>
+          <li key={name}>
+            <Badge className="flex h-full min-h-10 flex-wrap items-center gap-x-2 gap-y-0 rounded-sm bg-bg-page px-2.5 py-1.5 text-body-s whitespace-normal md:text-body-l">
+              <span className="min-w-0 wrap-anywhere text-text-gray-light">{name}</span>
+              <span className="font-semibold whitespace-nowrap text-text-gray-darker">
+                {amounts[`${menu.name}/${name}`] ?? amount}
+                {units[`${menu.name}/${name}`] ?? unit}
+              </span>
+            </Badge>
           </li>
         ))}
         {hiddenCount > 0 && (
           <li>
-            <button
-              type="button"
+            <Button
+              variant="plain"
               aria-expanded={expanded}
               onClick={() => setExpanded(!expanded)}
               className="min-h-10 rounded-sm px-1 text-left text-label-s whitespace-nowrap text-text-gray hover:text-button-primary focus-visible:ring-2 focus-visible:ring-button-primary focus-visible:outline-none md:text-label-l"
             >
               {expanded ? "접기" : `+ ${hiddenCount}개 더보기`}
-            </button>
+            </Button>
           </li>
         )}
       </ul>

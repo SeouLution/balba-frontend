@@ -1,12 +1,17 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 import { Checkbox } from "@/components/Checkbox";
 import { LogoMark } from "@/components/icons";
 import { PasswordField } from "@/components/PasswordField";
 import { TextField } from "@/components/TextField";
 
-import { OnboardingButton, OnboardingHeading, OnboardingScreen } from "./OnboardingScreen";
+import {
+  OnboardingButton,
+  OnboardingHeading,
+  OnboardingLink,
+  OnboardingScreen,
+} from "./OnboardingScreen";
 import { isMobileNumber } from "./phoneNumber";
 
 export function LoginPage() {
@@ -94,12 +99,12 @@ export function LoginPage() {
         </div>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3">
           <Checkbox label="로그인 상태 유지" defaultChecked className="gap-3 text-label-s" />
-          <Link
+          <OnboardingLink
             to="/signup"
             className="inline-flex min-h-11 items-center rounded-sm text-label-s text-text-gray underline underline-offset-4 focus-visible:ring-2 focus-visible:ring-button-primary focus-visible:outline-none"
           >
             회원가입하기
-          </Link>
+          </OnboardingLink>
         </div>
         <p role="status" className="mt-2 text-caption text-text-gray-darker">
           {notice}

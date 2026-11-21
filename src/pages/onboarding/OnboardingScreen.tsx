@@ -3,6 +3,7 @@ import { Link } from "react-router";
 
 import brandLogo from "@/assets/brand/balba-logo-white.svg";
 import { Button } from "@/components/Button";
+import { IconButton } from "@/components/IconButton";
 import { Check, ChevronLeft, X } from "@/components/icons";
 import { OnboardingIntro } from "@/components/OnboardingIntro";
 import { Progress } from "@/components/Progress";
@@ -250,16 +251,21 @@ export function OnboardingLink({
   to,
   children,
   onClick,
+  className,
 }: {
   to: string;
   children: ReactNode;
   onClick?: () => void;
+  className?: string;
 }) {
   return (
     <Link
       to={to}
       onClick={onClick}
-      className="rounded-sm text-center text-label-s text-text-black underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-button-primary focus-visible:outline-none"
+      className={cn(
+        "rounded-sm text-center text-label-s text-text-black underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-button-primary focus-visible:outline-none",
+        className,
+      )}
     >
       {children}
     </Link>
@@ -335,22 +341,21 @@ export function OnboardingDialog({
           <h2 id={titleId} className="text-label-l md:text-subtitle">
             {title}
           </h2>
-          <button
-            type="button"
+          <IconButton
+            variant="plain"
             aria-label={fullScreenOnMobile ? "주소 검색 닫기" : "닫기"}
             onClick={onClose}
+            icon={
+              <>
+                {fullScreenOnMobile && <ChevronLeft size={24} className="md:hidden" />}
+                <X size={20} className={fullScreenOnMobile ? "hidden md:block" : undefined} />
+              </>
+            }
             className={cn(
-              "grid size-11 place-items-center rounded-sm focus-visible:ring-2 focus-visible:ring-button-primary focus-visible:outline-none",
+              "grid h-11 w-11 place-items-center rounded-sm focus-visible:ring-2 focus-visible:ring-button-primary",
               fullScreenOnMobile && "order-first md:order-none",
             )}
-          >
-            {fullScreenOnMobile && <ChevronLeft size={24} aria-hidden className="md:hidden" />}
-            <X
-              size={20}
-              aria-hidden
-              className={fullScreenOnMobile ? "hidden md:block" : undefined}
-            />
-          </button>
+          />
         </div>
         {children}
       </div>
