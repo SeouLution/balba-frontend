@@ -5,10 +5,10 @@ export type RecipeExample = {
 };
 
 const gimbapIngredients = [
-  { name: "김", amount: 1, unit: "장", step: 1 },
+  { name: "김", amount: 1, unit: "개", step: 1 },
   { name: "밥", amount: 200, unit: "g", step: 5 },
   { name: "계란", amount: 0.5, unit: "개", step: 0.5 },
-  { name: "단무지", amount: 1, unit: "줄", step: 1 },
+  { name: "단무지", amount: 1, unit: "개", step: 1 },
 ];
 
 export const recipeExamples: RecipeExample[] = [

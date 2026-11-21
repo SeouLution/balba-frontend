@@ -1,7 +1,7 @@
 import { useOutletContext } from "react-router";
 
 import { initialHours, type HoursDraft } from "./businessHours";
-import type { ColumnMapping, StoreCategory } from "./onboardingTypes";
+import type { ColumnMapping, RecipeUnit, StoreCategory } from "./onboardingTypes";
 
 export type StoreDraft = {
   name: string;
@@ -36,6 +36,8 @@ export type OnboardingContext = {
   addReceiptPhotos: (count: number) => void;
   recipeAmounts: Record<string, number>;
   updateRecipeAmount: (key: string, amount: number) => void;
+  recipeUnits: Partial<Record<string, RecipeUnit>>;
+  updateRecipeUnit: (key: string, unit: RecipeUnit) => void;
 };
 
 export function useOnboarding() {

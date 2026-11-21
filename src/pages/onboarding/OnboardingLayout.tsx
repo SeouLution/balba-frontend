@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router";
 
 import { initialStoreDraft, useOnboarding, type OnboardingContext } from "./onboardingContext";
-import type { ColumnMapping } from "./onboardingTypes";
+import type { ColumnMapping, RecipeUnit } from "./onboardingTypes";
 import { exampleDetection } from "./salesColumns";
 
 export function OnboardingLayout() {
@@ -18,6 +18,7 @@ export function OnboardingLayout() {
   const [ingredientIds, setIngredientIds] = useState<string[] | null>(null);
   const [receiptPhotoCount, setReceiptPhotoCount] = useState(0);
   const [recipeAmounts, setRecipeAmounts] = useState<Record<string, number>>({});
+  const [recipeUnits, setRecipeUnits] = useState<OnboardingContext["recipeUnits"]>({});
 
   const context: OnboardingContext = {
     draft,
@@ -30,6 +31,7 @@ export function OnboardingLayout() {
       setIngredientIds(null);
       setReceiptPhotoCount(0);
       setRecipeAmounts({});
+      setRecipeUnits({});
     },
     mapping,
     setMapping,
@@ -42,6 +44,9 @@ export function OnboardingLayout() {
     recipeAmounts,
     updateRecipeAmount: (key, amount) =>
       setRecipeAmounts((current) => ({ ...current, [key]: amount })),
+    recipeUnits,
+    updateRecipeUnit: (key, unit: RecipeUnit) =>
+      setRecipeUnits((current) => ({ ...current, [key]: unit })),
   };
 
   return <Outlet context={context} />;

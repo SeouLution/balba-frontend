@@ -12,6 +12,7 @@ import {
   OnboardingHeading,
   OnboardingScreen,
 } from "./OnboardingScreen";
+import type { OnboardingContext } from "./onboardingContext";
 import { exampleSales } from "./salesColumns";
 
 const previewLimit = 5;
@@ -19,10 +20,12 @@ const previewLimit = 5;
 function MenuIngredientsCard({
   menu,
   amounts,
+  units,
   onEdit,
 }: {
   menu: RecipeExample;
   amounts: Record<string, number>;
+  units: OnboardingContext["recipeUnits"];
   onEdit: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -51,7 +54,7 @@ function MenuIngredientsCard({
             <span className="min-w-0 wrap-anywhere text-text-gray-light">{name}</span>
             <span className="font-semibold whitespace-nowrap text-text-gray-darker">
               {amounts[`${menu.name}/${name}`] ?? amount}
-              {unit}
+              {units[`${menu.name}/${name}`] ?? unit}
             </span>
           </li>
         ))}
@@ -75,11 +78,13 @@ function MenuIngredientsCard({
 function EditMenuIngredients({
   menu,
   savedAmounts,
+  units,
   onClose,
   onSave,
 }: {
   menu: RecipeExample;
   savedAmounts: Record<string, number>;
+  units: OnboardingContext["recipeUnits"];
   onClose: () => void;
   onSave: (amounts: Record<string, number>) => void;
 }) {
@@ -97,7 +102,7 @@ function EditMenuIngredients({
               <Stepper
                 label={`${name} 사용량`}
                 value={draft[key] ?? savedAmounts[key] ?? amount}
-                unit={unit}
+                unit={units[key] ?? unit}
                 step={step}
                 onChange={(next) => setDraft((current) => ({ ...current, [key]: next }))}
               />
@@ -114,7 +119,7 @@ function EditMenuIngredients({
 
 export function CoreIngredientsPage() {
   const navigate = useNavigate();
-  const { recipeAmounts, updateRecipeAmount, setIngredientIds } = useOnboarding();
+  const { recipeAmounts, recipeUnits, updateRecipeAmount, setIngredientIds } = useOnboarding();
   const [editingMenu, setEditingMenu] = useState<RecipeExample>();
 
   function confirmIngredients() {
@@ -157,6 +162,7 @@ export function CoreIngredientsPage() {
             key={menu.name}
             menu={menu}
             amounts={recipeAmounts}
+            units={recipeUnits}
             onEdit={() => setEditingMenu(menu)}
           />
         ))}
@@ -166,6 +172,7 @@ export function CoreIngredientsPage() {
           key={editingMenu.name}
           menu={editingMenu}
           savedAmounts={recipeAmounts}
+          units={recipeUnits}
           onClose={() => setEditingMenu(undefined)}
           onSave={(amounts) => {
             for (const [key, amount] of Object.entries(amounts)) updateRecipeAmount(key, amount);
