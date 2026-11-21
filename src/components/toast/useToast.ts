@@ -1,0 +1,15 @@
+import { useContext } from "react";
+
+import { ToastContext } from "@/components/toast/toastContext";
+
+/**
+ * const showToast = useToast();
+ * showToast("영수증을 읽었어요");
+ */
+export function useToast() {
+  const showToast = useContext(ToastContext);
+  if (!showToast) {
+    throw new Error("useToast는 ToastProvider 안에서만 쓸 수 있어요.");
+  }
+  return showToast;
+}
