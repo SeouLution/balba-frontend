@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { ReceiptQuestionAnswer, ReceiptScan, ReceiptSupplierGroup } from "@/api/receiptScans";
 import { Button } from "@/components";
@@ -16,15 +16,47 @@ type ClassifyStepProps = {
 };
 
 const VISIBLE_INGREDIENT_COUNT = 3;
+const RECEIPT_SCAN_TIMEOUT_MS = 60_000;
 
 /** 3.6 거래처별 자동 분류 */
 export function ClassifyStep({ storeId, scanId, onBack, onConfirmed }: ClassifyStepProps) {
-  const scanQuery = useReceiptScan(storeId, scanId);
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+  const scanQuery = useReceiptScan(storeId, scanId, !hasTimedOut);
   const confirmReceiptScan = useConfirmReceiptScan(storeId, scanId);
   const [answers, setAnswers] = useState<Record<string, ReceiptQuestionAnswer["answer"]>>({});
 
-  const scan = scanQuery.data;
-  const isReading = scanQuery.isPending || scan?.status === "PROCESSING";
+  const isReading = scanQuery.isPending || scanQuery.data?.status === "PROCESSING";
+
+  // 백엔드가 PROCESSING에 머물면 끝없이 기다리지 않도록 상한을 둔다.
+  useEffect(() => {
+    if (!isReading || hasTimedOut) return;
+    const timer = setTimeout(() => setHasTimedOut(true), RECEIPT_SCAN_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [isReading, hasTimedOut]);
+
+  // 폴링 중 재조회가 실패하면 data에는 직전 PROCESSING이 남는다. 그래서 에러를 먼저 본다.
+  if (scanQuery.isError || hasTimedOut) {
+    return (
+      <ReceiptStepLayout title="영수증 분류" onBack={onBack}>
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 py-20">
+          <p className="text-center text-body-m text-text-gray-darker">
+            {hasTimedOut
+              ? "영수증을 읽는 데 시간이 오래 걸리고 있어요."
+              : "영수증 결과를 불러오지 못했어요."}
+          </p>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setHasTimedOut(false);
+              scanQuery.refetch();
+            }}
+          >
+            다시 불러오기
+          </Button>
+        </div>
+      </ReceiptStepLayout>
+    );
+  }
 
   if (isReading) {
     return (
@@ -38,19 +70,7 @@ export function ClassifyStep({ storeId, scanId, onBack, onConfirmed }: ClassifyS
     );
   }
 
-  if (scanQuery.isError || !scan) {
-    return (
-      <ReceiptStepLayout title="영수증 분류" onBack={onBack}>
-        <div className="flex flex-col items-center gap-4 py-20">
-          <p className="text-body-m text-text-gray-darker">영수증 결과를 불러오지 못했어요.</p>
-          <Button variant="secondary" onClick={() => scanQuery.refetch()}>
-            다시 불러오기
-          </Button>
-        </div>
-      </ReceiptStepLayout>
-    );
-  }
-
+  const scan = scanQuery.data;
   const groups = scan.groups ?? [];
   if (groups.length === 0) {
     return (

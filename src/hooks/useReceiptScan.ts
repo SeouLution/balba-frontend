@@ -16,12 +16,15 @@ export function useCreateReceiptScan(storeId: string) {
 }
 
 // 영수증 읽기는 비동기라 PROCESSING인 동안 계속 다시 조회한다.
-export function useReceiptScan(storeId: string, scanId: string | null) {
+// 조회가 실패했거나 shouldPoll이 false(시간 초과)면 멈춘다.
+export function useReceiptScan(storeId: string, scanId: string | null, shouldPoll = true) {
   return useQuery({
     queryKey: ["receiptScan", storeId, scanId],
     queryFn: scanId ? () => getReceiptScan(storeId, scanId) : skipToken,
     refetchInterval: (query) =>
-      query.state.data?.status === "PROCESSING" ? RECEIPT_SCAN_POLLING_MS : false,
+      shouldPoll && query.state.status !== "error" && query.state.data?.status === "PROCESSING"
+        ? RECEIPT_SCAN_POLLING_MS
+        : false,
   });
 }
 
