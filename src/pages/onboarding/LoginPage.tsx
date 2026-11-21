@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import type { FormEvent } from "react";
 import { useNavigate } from "react-router";
 
 import { ApiError } from "@/api/client";
@@ -14,30 +14,18 @@ import {
   OnboardingLink,
   OnboardingScreen,
 } from "./OnboardingScreen";
-import { isMobileNumber, normalizePhoneNumber } from "./phoneNumber";
 
 export function LoginPage() {
   const navigate = useNavigate();
   const login = useLogIn();
-  const [phoneError, setPhoneError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (login.isPending) return;
 
     const values = new FormData(event.currentTarget);
-    const phoneNumber = normalizePhoneNumber(String(values.get("phone") ?? ""));
+    const phoneNumber = String(values.get("phone") ?? "");
     const password = String(values.get("password") ?? "");
-    const nextPhoneError = isMobileNumber(phoneNumber)
-      ? ""
-      : "01로 시작하는 휴대폰 번호 10~11자리를 입력해 주세요.";
-    const passwordLength = Array.from(password).length;
-    const nextPasswordError =
-      passwordLength >= 8 && passwordLength <= 128 ? "" : "비밀번호를 8~128자로 입력해 주세요.";
-    setPhoneError(nextPhoneError);
-    setPasswordError(nextPasswordError);
-    if (nextPhoneError || nextPasswordError) return;
 
     login.mutate(
       { phoneNumber, password },
@@ -79,13 +67,8 @@ export function LoginPage() {
             label="휴대폰 번호"
             autoComplete="username"
             placeholder="휴대폰 번호를 입력해 주세요."
-            required
             readOnly={login.isPending}
-            error={phoneError || undefined}
-            onChange={() => {
-              setPhoneError("");
-              login.reset();
-            }}
+            onChange={() => login.reset()}
             className="rounded-sm border-border-grey text-label-l"
           />
           <PasswordField
@@ -93,13 +76,8 @@ export function LoginPage() {
             label="비밀번호"
             autoComplete="current-password"
             placeholder="비밀번호를 입력해 주세요."
-            required
             readOnly={login.isPending}
-            error={passwordError || undefined}
-            onChange={() => {
-              setPasswordError("");
-              login.reset();
-            }}
+            onChange={() => login.reset()}
             className="rounded-sm border-border-grey text-label-l"
           />
         </div>
