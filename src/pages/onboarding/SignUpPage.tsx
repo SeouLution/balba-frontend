@@ -1,4 +1,4 @@
-import type { FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
 
 import { ApiError } from "@/api/client";
@@ -13,10 +13,12 @@ import {
   OnboardingLink,
   OnboardingScreen,
 } from "./OnboardingScreen";
+import { validatePhoneNumber } from "./phoneNumber";
 
 export function SignUpPage() {
   const navigate = useNavigate();
   const signup = useSignUp();
+  const [phoneError, setPhoneError] = useState("");
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -25,6 +27,9 @@ export function SignUpPage() {
     const values = new FormData(event.currentTarget);
     const phoneNumber = String(values.get("phone") ?? "");
     const password = String(values.get("password") ?? "");
+    const nextPhoneError = validatePhoneNumber(phoneNumber);
+    setPhoneError(nextPhoneError);
+    if (nextPhoneError) return;
 
     signup.mutate(
       { phoneNumber, password },
@@ -64,12 +69,18 @@ export function SignUpPage() {
       >
         <TextField
           type="tel"
+          inputMode="numeric"
+          maxLength={11}
           name="phone"
           label="휴대폰 번호"
           autoComplete="username"
           placeholder="휴대폰 번호를 입력해 주세요."
           readOnly={signup.isPending}
-          onChange={() => signup.reset()}
+          error={phoneError}
+          onChange={() => {
+            setPhoneError("");
+            signup.reset();
+          }}
           className="rounded-sm border-border-grey text-label-l"
         />
         <PasswordField
