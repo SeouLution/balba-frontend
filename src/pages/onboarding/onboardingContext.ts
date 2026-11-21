@@ -4,7 +4,6 @@ import type { StoreCategory } from "@/api/stores";
 import type { useSalesImport } from "@/hooks/useSalesImport";
 
 import { initialHours, type HoursDraft } from "./businessHours";
-import type { RecipeIngredient, RecipeUnit } from "./onboardingTypes";
 
 export type StoreDraft = {
   name: string;
@@ -36,16 +35,8 @@ export type OnboardingContext = {
   setSalesUpload: (upload: SalesUpload | null) => void;
   salesImport: ReturnType<typeof useSalesImport>;
   salesConfirmed: boolean;
-  ingredientIds: string[] | null;
-  setIngredientIds: (ids: string[]) => void;
   receiptPhotoCount: number;
   addReceiptPhotos: (count: number) => void;
-  recipeAmounts: Record<string, number>;
-  updateRecipeAmount: (key: string, amount: number) => void;
-  recipeUnits: Partial<Record<string, RecipeUnit>>;
-  updateRecipeUnit: (key: string, unit: RecipeUnit) => void;
-  editedMenuIngredients: Partial<Record<string, RecipeIngredient[]>>;
-  saveMenuIngredients: (menuName: string, ingredients: RecipeIngredient[]) => void;
 };
 
 export function useOnboarding() {

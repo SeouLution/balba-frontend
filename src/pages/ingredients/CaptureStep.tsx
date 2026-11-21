@@ -15,7 +15,7 @@ type CapturedPhoto = {
 type CaptureStepProps = {
   storeId: string;
   onBack: () => void;
-  onUploaded: (scanId: string) => void;
+  onUploaded: (scanId: string, photoCount: number) => void;
 };
 
 /** 3.5 영수증 연속 촬영 */
@@ -50,7 +50,7 @@ export function CaptureStep({ storeId, onBack, onUploaded }: CaptureStepProps) {
   function handleDone() {
     createReceiptScan.mutate(
       photos.map((photo) => photo.blob),
-      { onSuccess: ({ id }) => onUploaded(id) },
+      { onSuccess: ({ id }) => onUploaded(id, photos.length) },
     );
   }
 

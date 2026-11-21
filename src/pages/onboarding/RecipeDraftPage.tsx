@@ -3,42 +3,63 @@ import { useNavigate } from "react-router";
 
 import { Badge } from "@/components/Badge";
 import { Chip } from "@/components/Chip";
-import { DropdownOption } from "@/components/DropdownOption";
-import { InfoBox } from "@/components/InfoBox";
-import { Select } from "@/components/Select";
+import { Loading } from "@/components/Loading";
 import { TextField } from "@/components/TextField";
 import { TopBar } from "@/components/TopBar";
+import { useRecipes, useSaveRecipes } from "@/hooks/useRecipes";
 
-import { ingredientMenuExamples, recipeExamples } from "./ingredientExamples";
 import { useOnboarding } from "./onboardingContext";
-import { OnboardingButton, OnboardingHeading, OnboardingScreen } from "./OnboardingScreen";
-import { getRecipeIngredients } from "./recipeIngredients";
+import {
+  OnboardingButton,
+  OnboardingError,
+  OnboardingHeading,
+  OnboardingScreen,
+} from "./OnboardingScreen";
 
 export function RecipeDraftPage() {
   const navigate = useNavigate();
-  const onboarding = useOnboarding();
-  const [recipeIndex, setRecipeIndex] = useState(0);
-  const menus = [
-    ...recipeExamples,
-    ...ingredientMenuExamples.filter(
-      ({ name }) =>
-        onboarding.editedMenuIngredients[name] &&
-        !recipeExamples.some((menu) => menu.name === name),
-    ),
-  ];
-  const recipe = menus[recipeIndex];
-  const ingredients = getRecipeIngredients(recipe, onboarding);
+  const { store, receiptPhotoCount } = useOnboarding();
+  const storeId = store?.id ?? "";
+  const recipes = useRecipes(storeId, { enabled: Boolean(store) });
+  const save = useSaveRecipes(storeId);
+  const [menuId, setMenuId] = useState<string>();
+  const [amounts, setAmounts] = useState<Record<string, string>>({});
+  const menus = recipes.data?.items ?? [];
+  const recipe = menus.find(({ menu }) => menu.id === menuId) ?? menus[0];
+  const ready = !recipes.isError && recipes.data?.generationStatus === "READY";
+  const hasInvalidAmount = Object.values(amounts).some(
+    (amount) => amount.trim() === "" || !Number.isFinite(Number(amount)) || Number(amount) < 0,
+  );
+
+  function finish() {
+    if (!ready || hasInvalidAmount || save.isPending) return;
+    const items = menus.flatMap(({ menu, items }) => {
+      const replacements = items.map(({ ingredient, quantity }) => ({
+        ingredientId: ingredient.id,
+        quantity: Number(amounts[`${menu.id}/${ingredient.id}`] ?? quantity.value),
+      }));
+      return replacements.some(({ quantity }, index) => quantity !== items[index].quantity.value)
+        ? [{ menuId: menu.id, items: replacements }]
+        : [];
+    });
+
+    if (!items.length) {
+      navigate("../complete");
+      return;
+    }
+    save.mutate({ items }, { onSuccess: () => navigate("../complete") });
+  }
 
   return (
     <OnboardingScreen
       step={4}
       sidebarStep={5}
-      receiptAttached={onboarding.receiptPhotoCount > 0}
+      receiptAttached={receiptPhotoCount > 0}
       wideCard
       scrollBody
       header={
         <TopBar
-          onBack={() => navigate("../receipt")}
+          onBack={save.isPending ? undefined : () => navigate("../receipt")}
           className="h-[72px] pr-5 pl-2 md:h-20 md:pt-5 md:pr-10 md:pb-4 md:pl-5"
           endContent={
             <Badge type="ai" className="gap-1.25 px-2.5 font-medium">
@@ -47,95 +68,90 @@ export function RecipeDraftPage() {
           }
         />
       }
-      footer={<OnboardingButton onClick={() => navigate("../complete")}>저장하기</OnboardingButton>}
+      footer={
+        recipes.isError ? (
+          <OnboardingButton disabled={recipes.isFetching} onClick={() => void recipes.refetch()}>
+            다시 확인
+          </OnboardingButton>
+        ) : ready ? (
+          <OnboardingButton disabled={hasInvalidAmount || save.isPending} onClick={finish}>
+            {save.isPending ? "저장 중…" : "저장하기"}
+          </OnboardingButton>
+        ) : null
+      }
     >
-      <OnboardingHeading
-        className="mb-4"
-        title={
-          <>
-            메뉴별 재료량을
-            <br />
-            미리 채워뒀어요
-          </>
-        }
-      >
-        엑셀의 메뉴 이름을 보고 만든 초안이에요. 필요한 수량과 단위를 고쳐주세요.
+      <OnboardingHeading className="mb-4" title="메뉴별 재료량을 미리 채워뒀어요">
+        메뉴 1인분에 들어가는 양을 확인하고 필요한 곳을 고쳐 주세요.
       </OnboardingHeading>
-      <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="레시피 메뉴">
-        {menus.map(({ name }, index) => (
-          <Chip
-            key={name}
-            className="font-semibold"
-            selected={recipeIndex === index}
-            onClick={() => setRecipeIndex(index)}
+      {recipes.isError ? (
+        <OnboardingError>레시피를 불러오지 못했어요. 다시 확인해 주세요.</OnboardingError>
+      ) : !ready ? (
+        <Loading>레시피를 확인하고 있어요.</Loading>
+      ) : recipe ? (
+        <>
+          <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="레시피 메뉴">
+            {menus.map(({ menu }) => (
+              <Chip
+                key={menu.id}
+                className="font-semibold"
+                selected={recipe.menu.id === menu.id}
+                onClick={() => setMenuId(menu.id)}
+              >
+                {menu.name}
+              </Chip>
+            ))}
+          </div>
+          <section
+            aria-label={`${recipe.menu.name} 레시피`}
+            className="rounded-md border border-button-subtle p-4"
           >
-            {name}
-          </Chip>
-        ))}
-      </div>
-      <section
-        aria-label={`${recipe.name} 레시피`}
-        className="rounded-md border border-button-subtle p-4"
-      >
-        <h2 className="text-body-s text-text-gray-darker">
-          {recipe.name} 1{recipe.unit}에 들어가는 양
-        </h2>
-        {ingredients.length === 0 && (
-          <p className="mt-2 text-body-s text-text-gray">등록된 재료가 없어요.</p>
-        )}
-        <ul className="divide-y divide-border-divider">
-          {ingredients.map(({ id, name, amount, unit }) => {
-            const key = `${recipe.name}/${id}`;
-            return (
-              <li key={key} className="flex items-center justify-between gap-2 py-2 text-body-l">
-                <span className="min-w-0 break-keep">{name}</span>
-                <div className="grid shrink-0 grid-cols-[repeat(2,4.5rem)] gap-2 md:grid-cols-[repeat(2,5rem)] md:gap-3">
-                  <TextField
-                    label={`${name} 사용량`}
-                    hideLabel
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step="any"
-                    defaultValue={amount}
-                    className="[appearance:textfield] rounded-sm border-border-primary px-3.5 text-label-l text-text-black [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                    onChange={(event) => {
-                      const nextAmount = event.currentTarget.valueAsNumber;
-                      if (Number.isFinite(nextAmount) && nextAmount >= 0) {
-                        onboarding.updateRecipeAmount(key, nextAmount);
-                      }
-                    }}
-                    onBlur={(event) => {
-                      const input = event.currentTarget;
-                      if (!Number.isFinite(input.valueAsNumber) || input.valueAsNumber < 0) {
-                        input.value = String(amount);
-                      }
-                    }}
-                  />
-                  <Select
-                    label={`${name} 단위`}
-                    hideLabel
-                    indicatorClassName="right-2.5 text-text-black"
-                    value={unit}
-                    className="rounded-sm border-border-grey pr-8 pl-3.5 text-label-l text-text-black"
-                    onChange={(event) => {
-                      const nextUnit = event.currentTarget.value;
-                      if (nextUnit === "개" || nextUnit === "g")
-                        onboarding.updateRecipeUnit(key, nextUnit);
-                    }}
+            <h2 className="text-body-s text-text-gray-darker">
+              {recipe.menu.name} 1{recipe.unit}에 들어가는 양
+            </h2>
+            {recipe.items.length === 0 && (
+              <p className="mt-2 text-body-s text-text-gray">등록된 재료가 없어요.</p>
+            )}
+            <ul className="divide-y divide-border-divider">
+              {recipe.items.map(({ ingredient, quantity }) => {
+                const key = `${recipe.menu.id}/${ingredient.id}`;
+                return (
+                  <li
+                    key={key}
+                    className="flex items-center justify-between gap-2 py-2 text-body-l"
                   >
-                    <DropdownOption value="개">개</DropdownOption>
-                    <DropdownOption value="g">g</DropdownOption>
-                  </Select>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-      <InfoBox className="mt-4 bg-surface-info">
-        처음엔 대략이어도 괜찮아요. 매주 실제 구매량과 비교해서 고쳐드려요
-      </InfoBox>
+                    <span className="min-w-0 break-keep">{ingredient.name}</span>
+                    <div className="flex w-28 shrink-0 items-center gap-2">
+                      <TextField
+                        label={`${ingredient.name} 사용량`}
+                        hideLabel
+                        type="number"
+                        inputMode="decimal"
+                        min={0}
+                        step="any"
+                        disabled={save.isPending}
+                        value={amounts[key] ?? quantity.value}
+                        onChange={(event) => {
+                          const amount = event.currentTarget.value;
+                          setAmounts((current) => ({ ...current, [key]: amount }));
+                        }}
+                      />
+                      <span>{quantity.unit}</span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+          {hasInvalidAmount && (
+            <OnboardingError>사용량은 0 이상의 숫자로 입력해 주세요.</OnboardingError>
+          )}
+          {save.isError && (
+            <OnboardingError>레시피를 저장하지 못했어요. 다시 시도해 주세요.</OnboardingError>
+          )}
+        </>
+      ) : (
+        <p className="text-body-s text-text-gray">확인할 메뉴가 없어요.</p>
+      )}
     </OnboardingScreen>
   );
 }
