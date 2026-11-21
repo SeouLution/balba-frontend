@@ -23,3 +23,20 @@ export type IngredientList = {
 export function listIngredients(storeId: string) {
   return request<IngredientList>(`/v1/stores/${storeId}/ingredients`);
 }
+
+export type ManualPurchaseCreate = {
+  ingredientId: string;
+  // 입고일. 생략하면 오늘. 미래 날짜는 422
+  purchasedOn?: string;
+  // 재료 단위(개 · g) 수량
+  quantity: number;
+};
+
+/** 영수증 없는 재료 수기 입고. 재고에만 반영되고 단가에는 쓰지 않는다. */
+export function createPurchase(storeId: string, body: ManualPurchaseCreate) {
+  return request<unknown>(`/v1/stores/${storeId}/purchases`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
