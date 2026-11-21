@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router";
 
 import { RequireStore } from "@/components/RequireStore";
 import { HomePage } from "@/pages/home/HomePage";
+import { MyPage } from "@/pages/my/MyPage";
 import { IngredientPriceFormPage } from "@/pages/ingredients/IngredientPriceFormPage";
 import { IngredientsPage } from "@/pages/ingredients/IngredientsPage";
 import { MenuAddPage } from "@/pages/ingredients/MenuAddPage";
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
       { path: "/order", element: <OrderPage /> },
       { path: "/order/new", element: <OrderEditPage /> },
       { path: "/order/share", element: <OrderSharePage /> },
+      { path: "/my", element: <MyPage /> },
     ],
   },
   {
