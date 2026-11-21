@@ -83,8 +83,13 @@ export function CaptureStep({ storeId, onBack, onUploaded }: CaptureStepProps) {
         {status !== "ready" && (
           <p className="absolute inset-0 flex items-center justify-center px-6 text-center text-body-m text-text-white/80">
             {status === "starting" && "카메라를 켜는 중이에요"}
-            {status === "denied" &&
-              "카메라 권한이 필요해요. 브라우저 설정에서 카메라를 허용해 주세요."}
+            {status === "denied" && (
+              <span>
+                카메라 권한이 필요해요.
+                <br />
+                브라우저 설정에서 카메라를 허용해 주세요.
+              </span>
+            )}
             {status === "unavailable" && "이 기기에서는 카메라를 쓸 수 없어요."}
           </p>
         )}
