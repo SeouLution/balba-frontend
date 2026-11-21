@@ -7,6 +7,7 @@ import { StoreHeader } from "@/components/StoreHeader";
 import { useHome } from "@/hooks/useHome";
 import { useStoreId } from "@/hooks/useStoreId";
 
+import { DeadlineChip } from "./DeadlineChip";
 import { ForecastCard } from "./ForecastCard";
 import { HomeBanners } from "./HomeBanners";
 import { formatMonthDayWeekday } from "./homeFormat";
@@ -48,6 +49,11 @@ export function HomePage() {
 
   return (
     <HomeLayout storeName={home.storeName}>
+      <DeadlineChip
+        view={home.view}
+        targetDate={home.targetDate}
+        businessHours={home.businessHours}
+      />
       {isTomorrow ? (
         <div className="flex items-baseline gap-3 pt-2">
           <h1 className="text-title text-button-primary">내일 영업 준비</h1>

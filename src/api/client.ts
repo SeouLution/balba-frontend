@@ -26,7 +26,8 @@ async function readErrorCode(response: Response): Promise<string | undefined> {
 }
 
 export async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${path}`, init);
+  // 로그인 쿠키(access_token)는 API 주소가 화면 주소와 달라도 함께 보낸다.
+  const response = await fetch(`${API_URL}${path}`, { ...init, credentials: "include" });
   if (!response.ok) {
     throw new ApiError(response.status, await readErrorCode(response));
   }
