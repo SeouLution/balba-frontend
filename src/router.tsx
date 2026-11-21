@@ -3,6 +3,8 @@ import { createBrowserRouter } from "react-router";
 import { HomePage } from "@/pages/home/HomePage";
 import { IngredientPriceFormPage } from "@/pages/ingredients/IngredientPriceFormPage";
 import { IngredientsPage } from "@/pages/ingredients/IngredientsPage";
+import { MenuAddPage } from "@/pages/ingredients/MenuAddPage";
+import { MenuReviewPage } from "@/pages/ingredients/MenuReviewPage";
 import { ReceiptFlowPage } from "@/pages/ingredients/ReceiptFlowPage";
 import { RecipeEditPage } from "@/pages/ingredients/RecipeEditPage";
 import { CoreIngredientsPage } from "@/pages/onboarding/CoreIngredientsPage";
@@ -30,6 +32,8 @@ export const router = createBrowserRouter([
   { path: "/ingredients", element: <IngredientsPage /> },
   { path: "/ingredients/recipes/:menuId", element: <RecipeEditPage /> },
   { path: "/ingredients/:ingredientId/price", element: <IngredientPriceFormPage /> },
+  { path: "/ingredients/menus/new", element: <MenuAddPage /> },
+  { path: "/ingredients/menus/review", element: <MenuReviewPage /> },
   { path: "/receipt", element: <ReceiptFlowPage /> },
   {
     path: "/onboarding",
