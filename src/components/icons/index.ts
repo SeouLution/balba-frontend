@@ -17,6 +17,7 @@ export {
   ChevronLeft,
   ChevronRight,
   ChevronUp,
+  CircleUserRound,
   Clock,
   Cloud,
   CloudRain,
