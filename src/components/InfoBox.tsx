@@ -7,9 +7,10 @@ type InfoBoxProps = {
   type?: "info" | "ai";
   className?: string;
   children: ReactNode;
+  icon?: ReactNode;
 };
 
-export function InfoBox({ type = "info", className, children }: InfoBoxProps) {
+export function InfoBox({ type = "info", className, children, icon }: InfoBoxProps) {
   return (
     <div
       className={cn(
@@ -17,11 +18,12 @@ export function InfoBox({ type = "info", className, children }: InfoBoxProps) {
         className,
       )}
     >
-      {type === "ai" && (
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-sm bg-ai-badge-bg">
-          <SparkIcon size={16} className="text-ai-spark" />
-        </span>
-      )}
+      {icon ??
+        (type === "ai" && (
+          <span className="flex size-7 shrink-0 items-center justify-center rounded-sm bg-ai-badge-bg">
+            <SparkIcon size={16} className="text-ai-spark" />
+          </span>
+        ))}
       <p>{children}</p>
     </div>
   );
