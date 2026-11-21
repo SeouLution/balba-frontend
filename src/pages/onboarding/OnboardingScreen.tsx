@@ -2,7 +2,6 @@ import { useEffect, useId, useRef, type ButtonHTMLAttributes, type ReactNode } f
 import { Link } from "react-router";
 
 import brandLogo from "@/assets/brand/balba-logo-white.svg";
-import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { Check, ChevronLeft, X } from "@/components/icons";
 import { OnboardingIntro } from "@/components/OnboardingIntro";
@@ -55,7 +54,7 @@ export function OnboardingScreen({
       <aside
         className={cn(
           "sticky top-0 hidden h-dvh flex-col bg-button-primary px-10 py-10 text-text-white min-[1025px]:flex",
-          currentStep && "overflow-y-auto",
+          currentStep && "overflow-y-auto min-[1025px]:max-[1199px]:px-6",
         )}
       >
         <img
@@ -87,7 +86,6 @@ export function OnboardingScreen({
                     <div
                       className={cn(
                         "flex items-center gap-5",
-                        isDeferred && "w-[251px] max-w-full",
                         !isCurrent && !isDone && "text-text-gray",
                       )}
                     >
@@ -109,17 +107,14 @@ export function OnboardingScreen({
                           </span>
                         )}
                       </span>
-                      <span className={cn("min-w-0 break-keep", isDeferred && "flex-1")}>
-                        {label}
-                      </span>
-                      {isDeferred && (
-                        <Badge
-                          type="outline"
-                          className="h-7.5 w-[51px] justify-center rounded-[6px] border border-button-subtle bg-transparent px-1.5 py-1 font-medium text-text-white"
-                        >
-                          나중에
-                        </Badge>
-                      )}
+                      <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="break-keep">{label}</span>
+                        {isDeferred && (
+                          <span className="inline-flex h-7.5 w-[51px] shrink-0 items-center justify-center gap-2.5 rounded-[6px] border border-button-subtle px-1.5 py-1 font-gothic-a1 text-caption whitespace-nowrap text-text-white">
+                            나중에
+                          </span>
+                        )}
+                      </div>
                     </div>
                     {details && (
                       <ul className="grid gap-4 pl-[62px] text-body-m font-normal">

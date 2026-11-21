@@ -68,6 +68,7 @@
   /* ── 글꼴 ── */
   --font-sans:
     "Pretendard Variable", system-ui, -apple-system, sans-serif; /* TODO: Figma 변수 "Family font" 실제 값 확인 */
+  --font-gothic-a1: "Gothic A1", var(--font-sans);
 
   /*
    * ── 텍스트 스타일 (Text styles) ──
