@@ -3,20 +3,12 @@ import { useNavigate } from "react-router";
 
 import type { IngredientStatus, IngredientSummary } from "@/api/ingredients";
 import { Button } from "@/components";
+import { AppTabBar } from "@/components/AppTabBar";
 import { Chip } from "@/components/Chip";
-import { ChartColumn, ChevronRight, House, Box, Tag } from "@/components/icons";
+import { ChevronRight } from "@/components/icons";
 import { Loading } from "@/components/Loading";
-import { TabBar, type TabBarItem } from "@/components/TabBar";
 import { useIngredients } from "@/hooks/useIngredients";
 import { useStoreId } from "@/hooks/useStoreId";
-
-// TODO: 홈 · 할인 · 리포트 라우트가 생기면 경로를 맞춘다.
-const TAB_BAR_ITEMS: TabBarItem[] = [
-  { to: "/home", label: "홈", icon: House },
-  { to: "/ingredients", label: "재료", icon: Box },
-  { to: "/discount", label: "할인", icon: Tag },
-  { to: "/report", label: "리포트", icon: ChartColumn },
-];
 
 /** 3.2 재료 탭 */
 export function IngredientsPage() {
@@ -40,7 +32,7 @@ export function IngredientsPage() {
         />
       </main>
 
-      <TabBar items={TAB_BAR_ITEMS} className="sticky bottom-0" />
+      <AppTabBar />
     </div>
   );
 }
