@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
 import { MAX_RECEIPT_IMAGES } from "@/api/receiptScans";
-import { Button } from "@/components";
 import { ChevronLeft } from "@/components/icons";
 import { useCamera } from "@/hooks/useCamera";
 import { useCreateReceiptScan } from "@/hooks/useReceiptScan";
@@ -66,7 +65,7 @@ export function CaptureStep({ storeId, onBack, onUploaded }: CaptureStepProps) {
         >
           <ChevronLeft size={24} strokeWidth={2.2} absoluteStrokeWidth aria-hidden />
         </button>
-        <h1 className="flex-1 text-label-l">영수증 촬영</h1>
+        <h1 className="flex-1 text-label-l">영수증 연속 촬영</h1>
         <span className="rounded-pill bg-ai-spark px-3 py-1 text-label-s text-text-black">
           {photos.length}장
         </span>
@@ -96,33 +95,37 @@ export function CaptureStep({ storeId, onBack, onUploaded }: CaptureStepProps) {
       </div>
 
       <div className="flex flex-col gap-3 px-5 pt-4 pb-6">
-        <Button
-          variant="secondary"
+        <button
+          type="button"
           disabled={photos.length === 0 || createReceiptScan.isPending}
           onClick={handleDone}
-          className="w-full"
+          className="h-form-button w-full rounded-sm border border-border-grey bg-button-surface-1 text-label-l text-text-black outline-none focus-visible:ring-4 focus-visible:ring-ai-spark active:bg-button-subtle disabled:opacity-60"
         >
           {createReceiptScan.isPending ? "올리는 중이에요" : "다 찍었어요"}
-        </Button>
+        </button>
 
         <p className="text-center text-label-s text-text-white/70">
           {createReceiptScan.isError
             ? "사진을 올리지 못했어요. 다시 눌러 주세요."
             : isFull
               ? `최대 ${MAX_RECEIPT_IMAGES}장까지 찍을 수 있어요`
-              : "거래처 상관없이 연달아 찍어 주세요"}
+              : "한 장씩 찍으면 거래처별로 알아서 나눠요"}
         </p>
 
         {photos.length > 0 && (
-          <ul className="flex gap-2 overflow-x-auto" aria-label="찍은 영수증">
+          <ul
+            className="mx-auto flex max-w-full gap-2 overflow-x-auto p-0.5"
+            aria-label="찍은 영수증"
+          >
             {photos.map((photo, index) => (
               <li key={photo.id} className="shrink-0">
                 <img
                   src={photo.previewUrl}
                   alt={`영수증 ${index + 1}`}
                   className={cn(
-                    "h-14 w-10 rounded-sm object-cover",
-                    index === photos.length - 1 && "ring-2 ring-ai-spark",
+                    "h-12 w-9 rounded-sm border-2 border-transparent object-cover",
+                    // 방금 찍은 사진은 라임색 테두리
+                    index === photos.length - 1 && "border-ai-spark",
                   )}
                 />
               </li>
@@ -130,13 +133,16 @@ export function CaptureStep({ storeId, onBack, onUploaded }: CaptureStepProps) {
           </ul>
         )}
 
+        {/* 촬영 버튼: 흰 링 + 남색 틈 + 안쪽 흰 원 */}
         <button
           type="button"
           aria-label="찍기"
           disabled={!canShoot}
           onClick={handleShutter}
-          className="mx-auto mt-1 size-18 rounded-pill border-4 border-text-white/40 bg-text-white outline-none focus-visible:ring-4 focus-visible:ring-ai-spark disabled:opacity-40"
-        />
+          className="mx-auto mt-1 flex size-19 items-center justify-center rounded-pill border-4 border-text-white outline-none focus-visible:ring-4 focus-visible:ring-ai-spark active:scale-95 disabled:opacity-40"
+        >
+          <span aria-hidden className="size-15 rounded-pill bg-text-white" />
+        </button>
       </div>
     </div>
   );
