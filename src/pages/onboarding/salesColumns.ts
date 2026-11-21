@@ -11,6 +11,5 @@ export const exampleDetection: ColumnMapping = { date: "영업일자", menuName:
 export const exampleSales = { period: "6주", menuCount: "24개", recordCount: "9,812건" };
 
 export function isCompleteMapping(mapping: ColumnMapping) {
-  const columns = salesColumns.map(({ key }) => mapping[key]);
-  return columns.every(Boolean) && new Set(columns).size === salesColumns.length;
+  return salesColumns.every(({ key }) => Boolean(mapping[key]));
 }

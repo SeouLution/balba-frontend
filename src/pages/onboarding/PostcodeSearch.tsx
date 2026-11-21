@@ -1,5 +1,7 @@
 import { useState, type FormEvent } from "react";
 
+import { Badge } from "@/components/Badge";
+import { Button } from "@/components/Button";
 import { Search } from "@/components/icons";
 import { TextField } from "@/components/TextField";
 
@@ -53,9 +55,13 @@ export function PostcodeSearch({ onClose, onSelect }: PostcodeSearchProps) {
             onChange={(event) => setAddress(event.target.value)}
           />
           <OnboardingButton type="submit">주소 입력</OnboardingButton>
-          <button type="button" className="text-label-s underline" onClick={() => setManual(false)}>
+          <Button
+            variant="plain"
+            className="text-label-s underline"
+            onClick={() => setManual(false)}
+          >
             검색으로 돌아가기
-          </button>
+          </Button>
         </form>
       ) : (
         <>
@@ -68,7 +74,8 @@ export function PostcodeSearch({ onClose, onSelect }: PostcodeSearchProps) {
             className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2"
           >
             <TextField
-              label={<span className="sr-only">도로명 또는 지번</span>}
+              label="도로명 또는 지번"
+              hideLabel
               placeholder="예: 망원로"
               value={keyword}
               onChange={(event) => setKeyword(event.target.value)}
@@ -93,15 +100,13 @@ export function PostcodeSearch({ onClose, onSelect }: PostcodeSearchProps) {
                   <div className="grid gap-1">
                     <span className="text-caption">{postcode}</span>
                     <span className="flex items-start gap-2 text-body-m">
-                      <span className="shrink-0 rounded-sm bg-button-primary px-1.5 text-caption text-text-white">
+                      <Badge className="h-auto rounded-sm bg-button-primary px-1.5 text-text-white">
                         도로명
-                      </span>
+                      </Badge>
                       <span className="break-keep">{road}</span>
                     </span>
                     <span className="flex items-start gap-2 text-body-s text-text-gray-darker">
-                      <span className="shrink-0 rounded-sm bg-button-subtle px-1.5 text-caption text-text-black">
-                        지번
-                      </span>
+                      <Badge className="h-auto rounded-sm px-1.5">지번</Badge>
                       <span className="break-keep">{lot}</span>
                     </span>
                   </div>
@@ -120,13 +125,13 @@ export function PostcodeSearch({ onClose, onSelect }: PostcodeSearchProps) {
           {query && !results.length && (
             <p className="mt-3 text-body-s">일치하는 예시 주소가 없어요.</p>
           )}
-          <button
-            type="button"
+          <Button
+            variant="plain"
             onClick={() => setManual(true)}
             className="mt-4 min-h-11 self-start text-caption text-text-gray-darker underline underline-offset-2"
           >
             주소 직접 입력
-          </button>
+          </Button>
         </>
       )}
     </OnboardingDialog>

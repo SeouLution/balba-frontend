@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { Chip } from "@/components/Chip";
 import { DayChip } from "@/components/DayChip";
+import { DropdownOption } from "@/components/DropdownOption";
 import { InfoBox } from "@/components/InfoBox";
 import { Select } from "@/components/Select";
 import { cn } from "@/utils/cn";
@@ -41,14 +42,17 @@ function HoursSelect({
 }) {
   return (
     <Select
-      label={<span className="sr-only">{label}</span>}
+      label={label}
+      hideLabel
       value={value}
       disabled={disabled}
       onChange={(event) => onChange(event.target.value)}
       className="h-12 rounded-sm border-border-grey bg-button-surface-1 pr-8 pl-2.5 disabled:bg-bg-page"
     >
       {times.map((time) => (
-        <option key={time}>{time}</option>
+        <DropdownOption key={time} value={time}>
+          {time}
+        </DropdownOption>
       ))}
     </Select>
   );

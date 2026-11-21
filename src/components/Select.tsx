@@ -7,6 +7,8 @@ export type SelectProps = Omit<ComponentPropsWithRef<"select">, "multiple" | "si
   label: ReactNode;
   placeholder?: string;
   error?: string;
+  hideLabel?: boolean;
+  indicatorClassName?: string;
 };
 
 export function Select({
@@ -15,6 +17,8 @@ export function Select({
   required,
   placeholder,
   error,
+  hideLabel,
+  indicatorClassName,
   className,
   children,
   defaultValue,
@@ -27,7 +31,7 @@ export function Select({
   const fieldId = id ?? generatedId;
 
   return (
-    <Field id={fieldId} label={label} required={required} error={error}>
+    <Field id={fieldId} label={label} required={required} error={error} hideLabel={hideLabel}>
       <div className="relative h-form-field">
         <select
           {...props}
@@ -70,7 +74,10 @@ export function Select({
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="pointer-events-none absolute top-1/2 right-4 size-5 -translate-y-1/2 text-form-muted"
+          className={cn(
+            "pointer-events-none absolute top-1/2 right-4 size-5 -translate-y-1/2 text-form-muted",
+            indicatorClassName,
+          )}
         >
           <path d="m6 9 6 6 6-6" />
         </svg>

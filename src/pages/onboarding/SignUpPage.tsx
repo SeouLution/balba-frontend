@@ -1,10 +1,14 @@
 import { useState, type FormEvent } from "react";
-import { Link } from "react-router";
 
 import { PasswordField } from "@/components/PasswordField";
 import { TextField } from "@/components/TextField";
 
-import { OnboardingButton, OnboardingHeading, OnboardingScreen } from "./OnboardingScreen";
+import {
+  OnboardingButton,
+  OnboardingHeading,
+  OnboardingLink,
+  OnboardingScreen,
+} from "./OnboardingScreen";
 import { isMobileNumber } from "./phoneNumber";
 
 export function SignUpPage() {
@@ -92,12 +96,9 @@ export function SignUpPage() {
           {validated && (
             <>
               <p>입력 내용을 확인했어요. 계정 생성은 준비 중이에요.</p>
-              <Link
-                to="/"
-                className="mt-2 inline-block text-button-primary underline underline-offset-2"
-              >
+              <OnboardingLink to="/" className="mt-2 inline-block text-caption text-button-primary">
                 로그인으로 돌아가기
-              </Link>
+              </OnboardingLink>
             </>
           )}
         </div>

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router";
 
 import { Check } from "@/components/icons";
-import { cn } from "@/utils/cn";
+import { LoadingSpinner } from "@/components/Loading";
 
 import { OnboardingHeading, OnboardingScreen } from "./OnboardingScreen";
 
@@ -45,17 +45,16 @@ export function IngredientLoadingPage() {
               key={label}
               className="flex items-center gap-5 text-body-l-b break-keep text-button-primary md:text-subtitle md:font-bold"
             >
-              <span
-                aria-hidden
-                className={cn(
-                  "grid size-8 shrink-0 place-items-center rounded-full border-2",
-                  done
-                    ? "border-button-primary bg-button-primary text-text-white"
-                    : "border-border-divider border-b-button-primary motion-safe:animate-spin",
-                )}
-              >
-                {done && <Check size={20} />}
-              </span>
+              {done ? (
+                <span
+                  aria-hidden
+                  className="grid size-8 shrink-0 place-items-center rounded-full bg-button-primary text-text-white"
+                >
+                  <Check size={20} />
+                </span>
+              ) : (
+                <LoadingSpinner className="size-8 shrink-0 border-2 border-border-divider border-t-border-divider border-b-button-primary motion-reduce:animate-none" />
+              )}
               {label}
             </li>
           ))}

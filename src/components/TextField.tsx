@@ -6,6 +6,7 @@ export type TextFieldProps = ComponentPropsWithRef<"input"> & {
   label: ReactNode;
   error?: string;
   endAdornment?: ReactNode;
+  hideLabel?: boolean;
 };
 
 export function TextField({
@@ -14,6 +15,7 @@ export function TextField({
   required,
   error,
   endAdornment,
+  hideLabel,
   className,
   "aria-describedby": describedBy,
   "aria-invalid": invalid,
@@ -43,7 +45,7 @@ export function TextField({
   );
 
   return (
-    <Field id={fieldId} label={label} required={required} error={error}>
+    <Field id={fieldId} label={label} required={required} error={error} hideLabel={hideLabel}>
       {endAdornment ? (
         <div className="relative">
           {input}

@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
 
+import { Button } from "@/components/Button";
 import { Chip } from "@/components/Chip";
-import { ChevronRight, TriangleAlert } from "@/components/icons";
+import { ChevronRight } from "@/components/icons";
 import { TextField } from "@/components/TextField";
 
 import { describeHours } from "./businessHours";
@@ -85,25 +86,15 @@ export function StoreInfoPage() {
               {draft.roadAddress ? "다시 검색" : "주소 검색"}
             </OnboardingButton>
           </div>
-          <input
-            aria-label="도로명 주소"
-            aria-invalid={Boolean(addressError)}
-            aria-describedby={addressError ? "store-address-error" : undefined}
+          <TextField
+            label="도로명 주소"
+            hideLabel
+            error={addressError}
             readOnly
             value={draft.roadAddress}
             placeholder="주소 검색을 눌러 가게 주소를 찾아주세요"
-            className="h-13 min-w-0 rounded-sm border border-border-grey bg-bg-page px-3.5 text-body-s placeholder:text-text-gray aria-invalid:border-form-danger aria-invalid:bg-form-danger-soft"
+            className="rounded-sm border-border-grey bg-bg-page px-3.5 text-body-s placeholder:text-text-gray"
           />
-          {addressError && (
-            <p
-              id="store-address-error"
-              role="alert"
-              className="flex items-center gap-1 text-caption text-danger-default"
-            >
-              <TriangleAlert size={16} className="shrink-0" aria-hidden />
-              {addressError}
-            </p>
-          )}
         </div>
         {draft.roadAddress && (
           <TextField
@@ -133,8 +124,8 @@ export function StoreInfoPage() {
           <span id="hours-label" className="text-label-s">
             영업 시간 · 쉬는 날
           </span>
-          <button
-            type="button"
+          <Button
+            variant="plain"
             aria-labelledby="hours-label hours-edit"
             onClick={() => setShowHours(true)}
             className="flex min-h-[50px] items-center justify-between gap-2 rounded-sm border border-border-grey px-3.5 py-2 text-left text-body-s hover:bg-bg-hover focus-visible:ring-2 focus-visible:ring-button-primary"
@@ -143,7 +134,7 @@ export function StoreInfoPage() {
             <span id="hours-edit" className="flex shrink-0 items-center gap-1">
               수정 <ChevronRight size={16} aria-hidden />
             </span>
-          </button>
+          </Button>
         </div>
       </form>
       {showAddress && (

@@ -1,4 +1,4 @@
-import { useRef, type ChangeEvent } from "react";
+import { useRef } from "react";
 import { useLocation, useNavigate } from "react-router";
 
 import { InfoBox } from "@/components/InfoBox";
@@ -19,12 +19,6 @@ export function ReceiptPhotoPage() {
       return;
     }
     navigate(path);
-  }
-
-  function recordSelection(event: ChangeEvent<HTMLInputElement>) {
-    const count = event.currentTarget.files?.length ?? 0;
-    if (count) addReceiptPhotos(count);
-    event.currentTarget.value = "";
   }
 
   return (
@@ -64,14 +58,12 @@ export function ReceiptPhotoPage() {
       </OnboardingHeading>
       <div className="grid gap-4">
         <div className="grid gap-2.5 rounded-md bg-surface-receipt-action px-5 py-6 text-center">
-          <input
+          <FilePickerInput
             ref={fileInput}
-            type="file"
             accept="image/*"
             capture="environment"
             multiple
-            hidden
-            onChange={recordSelection}
+            onFilesChange={(files) => addReceiptPhotos(files.length)}
           />
           <OnboardingButton onClick={() => fileInput.current?.click()}>
             영수증 사진 찍기
@@ -99,3 +91,4 @@ export function ReceiptPhotoPage() {
     </OnboardingScreen>
   );
 }
+import { FilePickerInput } from "@/components/FilePickerInput";

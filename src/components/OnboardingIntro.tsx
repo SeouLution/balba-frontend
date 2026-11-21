@@ -1,3 +1,4 @@
+import { Badge } from "@/components/Badge";
 import { Check, SparkIcon } from "@/components/icons";
 
 const startBenefits = [
@@ -9,10 +10,10 @@ const startBenefits = [
 export function OnboardingIntro() {
   return (
     <div className="mt-auto min-h-0 overflow-y-auto pt-8">
-      <p className="inline-flex items-center gap-2.5 rounded-pill bg-ai-spark px-3.5 py-2 text-label-s-b font-bold text-button-primary min-[1600px]:gap-3 min-[1600px]:px-4 min-[1600px]:text-subtitle">
+      <Badge className="h-auto gap-2.5 bg-ai-spark px-3.5 py-2 text-label-s-b font-bold text-button-primary min-[1600px]:gap-3 min-[1600px]:px-4 min-[1600px]:text-subtitle">
         <SparkIcon className="size-5 shrink-0 min-[1600px]:size-6" />
         동네식당 AI 발주 도우미
-      </p>
+      </Badge>
       <p className="mt-6 text-subtitle font-bold break-keep min-[1320px]:text-title min-[1600px]:text-display-l">
         감이 아니라 <span className="text-ai-spark">데이터</span>로
         <br />
@@ -26,10 +27,6 @@ export function OnboardingIntro() {
           </li>
         ))}
       </ul>
-      <p className="mt-8 text-label-s">
-        도움이 필요하면{" "}
-        <strong className="font-semibold underline underline-offset-4">고객센터</strong>
-      </p>
     </div>
   );
 }

@@ -3,41 +3,49 @@ import { useNavigate } from "react-router";
 
 import { Badge } from "@/components/Badge";
 import { Chip } from "@/components/Chip";
-import { ChevronLeft } from "@/components/icons";
+import { DropdownOption } from "@/components/DropdownOption";
 import { InfoBox } from "@/components/InfoBox";
-import { Stepper } from "@/components/Stepper";
+import { Select } from "@/components/Select";
+import { TextField } from "@/components/TextField";
+import { TopBar } from "@/components/TopBar";
 
-import { recipeExamples } from "./ingredientExamples";
+import { ingredientMenuExamples, recipeExamples } from "./ingredientExamples";
 import { useOnboarding } from "./onboardingContext";
 import { OnboardingButton, OnboardingHeading, OnboardingScreen } from "./OnboardingScreen";
+import { getRecipeIngredients } from "./recipeIngredients";
 
 export function RecipeDraftPage() {
   const navigate = useNavigate();
-  const { recipeAmounts, updateRecipeAmount, receiptPhotoCount } = useOnboarding();
+  const onboarding = useOnboarding();
   const [recipeIndex, setRecipeIndex] = useState(0);
-  const recipe = recipeExamples[recipeIndex];
+  const menus = [
+    ...recipeExamples,
+    ...ingredientMenuExamples.filter(
+      ({ name }) =>
+        onboarding.editedMenuIngredients[name] &&
+        !recipeExamples.some((menu) => menu.name === name),
+    ),
+  ];
+  const recipe = menus[recipeIndex];
+  const ingredients = getRecipeIngredients(recipe, onboarding);
 
   return (
     <OnboardingScreen
       step={4}
       sidebarStep={5}
-      receiptAttached={receiptPhotoCount > 0}
+      receiptAttached={onboarding.receiptPhotoCount > 0}
       wideCard
       scrollBody
       header={
-        <header className="flex h-[72px] items-center justify-between pr-5 pl-2 md:h-20 md:pt-5 md:pr-10 md:pb-4 md:pl-5">
-          <button
-            type="button"
-            aria-label="뒤로 가기"
-            onClick={() => navigate("../receipt")}
-            className="grid size-11 place-items-center rounded-md focus-visible:ring-2 focus-visible:ring-button-primary focus-visible:outline-none"
-          >
-            <ChevronLeft size={24} strokeWidth={2.2} absoluteStrokeWidth aria-hidden />
-          </button>
-          <Badge type="ai" className="gap-1.25 px-2.5 font-medium">
-            AI 초안
-          </Badge>
-        </header>
+        <TopBar
+          onBack={() => navigate("../receipt")}
+          className="h-[72px] pr-5 pl-2 md:h-20 md:pt-5 md:pr-10 md:pb-4 md:pl-5"
+          endContent={
+            <Badge type="ai" className="gap-1.25 px-2.5 font-medium">
+              AI 초안
+            </Badge>
+          }
+        />
       }
       footer={<OnboardingButton onClick={() => navigate("../complete")}>저장하기</OnboardingButton>}
     >
@@ -51,10 +59,10 @@ export function RecipeDraftPage() {
           </>
         }
       >
-        엑셀의 메뉴 이름을 보고 만든 초안이에요. 숫자만 고쳐주세요
+        엑셀의 메뉴 이름을 보고 만든 초안이에요. 필요한 수량과 단위를 고쳐주세요.
       </OnboardingHeading>
       <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="레시피 메뉴">
-        {recipeExamples.map(({ name }, index) => (
+        {menus.map(({ name }, index) => (
           <Chip
             key={name}
             className="font-semibold"
@@ -72,22 +80,54 @@ export function RecipeDraftPage() {
         <h2 className="text-body-s text-text-gray-darker">
           {recipe.name} 1{recipe.unit}에 들어가는 양
         </h2>
+        {ingredients.length === 0 && (
+          <p className="mt-2 text-body-s text-text-gray">등록된 재료가 없어요.</p>
+        )}
         <ul className="divide-y divide-border-divider">
-          {recipe.items.map(({ name, amount, unit, step }) => {
-            const key = `${recipe.name}/${name}`;
+          {ingredients.map(({ id, name, amount, unit }) => {
+            const key = `${recipe.name}/${id}`;
             return (
               <li key={key} className="flex items-center justify-between gap-2 py-2 text-body-l">
-                <span>{name}</span>
-                <Stepper
-                  label={`${name} 사용량`}
-                  className="w-40 shrink-0 md:w-45"
-                  buttonClassName="rounded-sm border-border-grey text-text-black"
-                  valueClassName="flex-1 text-number font-semibold text-text-black"
-                  value={recipeAmounts[key] ?? amount}
-                  unit={unit}
-                  step={step}
-                  onChange={(next) => updateRecipeAmount(key, next)}
-                />
+                <span className="min-w-0 break-keep">{name}</span>
+                <div className="grid shrink-0 grid-cols-[repeat(2,4.5rem)] gap-2 md:grid-cols-[repeat(2,5rem)] md:gap-3">
+                  <TextField
+                    label={`${name} 사용량`}
+                    hideLabel
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    step="any"
+                    defaultValue={amount}
+                    className="[appearance:textfield] rounded-sm border-border-primary px-3.5 text-label-l text-text-black [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    onChange={(event) => {
+                      const nextAmount = event.currentTarget.valueAsNumber;
+                      if (Number.isFinite(nextAmount) && nextAmount >= 0) {
+                        onboarding.updateRecipeAmount(key, nextAmount);
+                      }
+                    }}
+                    onBlur={(event) => {
+                      const input = event.currentTarget;
+                      if (!Number.isFinite(input.valueAsNumber) || input.valueAsNumber < 0) {
+                        input.value = String(amount);
+                      }
+                    }}
+                  />
+                  <Select
+                    label={`${name} 단위`}
+                    hideLabel
+                    indicatorClassName="right-2.5 text-text-black"
+                    value={unit}
+                    className="rounded-sm border-border-grey pr-8 pl-3.5 text-label-l text-text-black"
+                    onChange={(event) => {
+                      const nextUnit = event.currentTarget.value;
+                      if (nextUnit === "개" || nextUnit === "g")
+                        onboarding.updateRecipeUnit(key, nextUnit);
+                    }}
+                  >
+                    <DropdownOption value="개">개</DropdownOption>
+                    <DropdownOption value="g">g</DropdownOption>
+                  </Select>
+                </div>
               </li>
             );
           })}

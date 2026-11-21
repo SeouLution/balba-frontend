@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
+import { Button } from "@/components/Button";
+
 import detectedIcon from "./assets/detected.svg";
 import missingIcon from "./assets/missing.svg";
 import { useOnboarding } from "./onboardingContext";
@@ -58,13 +60,13 @@ export function SalesColumnsPage() {
             <OnboardingButton onClick={() => setEditing(true)}>칸 고치기</OnboardingButton>
           )}
           {ready && (
-            <button
-              type="button"
+            <Button
+              variant="plain"
               onClick={() => setEditing(true)}
               className="min-h-8 text-center text-label-s underline underline-offset-2"
             >
               칸 고치기
-            </button>
+            </Button>
           )}
         </>
       }

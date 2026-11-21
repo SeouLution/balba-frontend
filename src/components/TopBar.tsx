@@ -1,5 +1,7 @@
+import type { ReactNode } from "react";
 import { useNavigate } from "react-router";
 
+import { IconButton } from "@/components/IconButton";
 import { ChevronLeft } from "@/components/icons";
 import { cn } from "@/utils/cn";
 
@@ -7,10 +9,11 @@ type TopBarProps = {
   step?: { current: number; total: number };
   onBack?: () => void;
   className?: string;
+  endContent?: ReactNode;
 };
 
 /** 뒤로 가기 + 단계 표시. onBack이 없으면 브라우저 뒤로 가기를 해요. */
-export function TopBar({ step, onBack, className }: TopBarProps) {
+export function TopBar({ step, onBack, className, endContent }: TopBarProps) {
   const navigate = useNavigate();
 
   return (
@@ -20,19 +23,19 @@ export function TopBar({ step, onBack, className }: TopBarProps) {
         className,
       )}
     >
-      <button
-        type="button"
+      <IconButton
+        variant="plain"
         aria-label="뒤로 가기"
         onClick={onBack ?? (() => navigate(-1))}
-        className="flex size-11 items-center justify-center rounded-sm text-text-black outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20"
-      >
-        <ChevronLeft size={24} strokeWidth={2.2} absoluteStrokeWidth aria-hidden />
-      </button>
-      {step && (
-        <span className="text-label-s text-text-gray-darker">
-          {step.current} / {step.total}
-        </span>
-      )}
+        icon={<ChevronLeft size={24} strokeWidth={2.2} absoluteStrokeWidth />}
+        className="grid h-11 w-11 place-items-center rounded-sm text-text-black focus-visible:ring-4 focus-visible:ring-button-primary/20"
+      />
+      {endContent ??
+        (step && (
+          <span className="text-label-s text-text-gray-darker">
+            {step.current} / {step.total}
+          </span>
+        ))}
     </header>
   );
 }
