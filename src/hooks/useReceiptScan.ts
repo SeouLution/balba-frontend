@@ -38,6 +38,7 @@ export function useConfirmReceiptScan(storeId: string, scanId: string) {
       queryClient.invalidateQueries({ queryKey: ["receiptScan", storeId, scanId] });
       queryClient.invalidateQueries({ queryKey: ["suppliers", storeId] });
       queryClient.invalidateQueries({ queryKey: ["ingredients", storeId] });
+      queryClient.invalidateQueries({ queryKey: ["home", storeId] });
     },
   });
 }

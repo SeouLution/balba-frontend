@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router";
 
-import App from "@/App";
+import { HomePage } from "@/pages/home/HomePage";
 import { IngredientsPage } from "@/pages/ingredients/IngredientsPage";
 import { ReceiptFlowPage } from "@/pages/ingredients/ReceiptFlowPage";
 import { CoreIngredientsPage } from "@/pages/onboarding/CoreIngredientsPage";
@@ -24,7 +24,7 @@ import { StoreInfoPage } from "@/pages/onboarding/StoreInfoPage";
 export const router = createBrowserRouter([
   { path: "/", element: <LoginPage /> },
   { path: "/signup", element: <SignUpPage /> },
-  { path: "/home", element: <App /> },
+  { path: "/home", element: <HomePage /> },
   { path: "/ingredients", element: <IngredientsPage /> },
   { path: "/receipt", element: <ReceiptFlowPage /> },
   {
