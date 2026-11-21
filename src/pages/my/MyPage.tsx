@@ -185,18 +185,21 @@ function StoreForm({ storeId, store }: { storeId: string; store: Store }) {
         </OnboardingButton>
       </form>
 
-      <OnboardingButton
-        secondary
-        disabled={logOut.isPending}
-        onClick={() =>
-          logOut.mutate(undefined, {
-            onError: () => showToast("로그아웃하지 못했어요. 다시 눌러 주세요."),
-          })
-        }
-        className="mt-auto"
-      >
-        {logOut.isPending ? "로그아웃하는 중…" : "로그아웃"}
-      </OnboardingButton>
+      {/* mt-auto로 맨 아래에 두고, 화면이 작아도 수정하기와 붙지 않게 pt로 최소 간격을 둔다. */}
+      <div className="mt-auto pt-10">
+        <OnboardingButton
+          secondary
+          disabled={logOut.isPending}
+          onClick={() =>
+            logOut.mutate(undefined, {
+              onError: () => showToast("로그아웃하지 못했어요. 다시 눌러 주세요."),
+            })
+          }
+          className="w-full"
+        >
+          {logOut.isPending ? "로그아웃하는 중…" : "로그아웃"}
+        </OnboardingButton>
+      </div>
 
       {showAddress && (
         <PostcodeSearch
