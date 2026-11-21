@@ -1,0 +1,12 @@
+import { useQuery } from "@tanstack/react-query";
+
+import { getMe } from "@/api/auth";
+
+export function useMe() {
+  return useQuery({
+    queryKey: ["me"],
+    queryFn: ({ signal }) => getMe(signal),
+    gcTime: 0,
+    retry: false,
+  });
+}
