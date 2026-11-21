@@ -1,6 +1,8 @@
 import { createBrowserRouter } from "react-router";
 
 import App from "@/App";
+import { IngredientsPage } from "@/pages/ingredients/IngredientsPage";
+import { ReceiptFlowPage } from "@/pages/ingredients/ReceiptFlowPage";
 import { CoreIngredientsPage } from "@/pages/onboarding/CoreIngredientsPage";
 import { IngredientLoadingPage } from "@/pages/onboarding/IngredientLoadingPage";
 import { LoginPage } from "@/pages/onboarding/LoginPage";
@@ -23,6 +25,8 @@ export const router = createBrowserRouter([
   { path: "/", element: <LoginPage /> },
   { path: "/signup", element: <SignUpPage /> },
   { path: "/home", element: <App /> },
+  { path: "/ingredients", element: <IngredientsPage /> },
+  { path: "/receipt", element: <ReceiptFlowPage /> },
   {
     path: "/onboarding",
     element: <OnboardingLayout />,
