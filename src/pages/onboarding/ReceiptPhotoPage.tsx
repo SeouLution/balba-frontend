@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 
 import { InfoBox } from "@/components/InfoBox";
 import { TopBar } from "@/components/TopBar";
+import { PriceInputSheet } from "@/pages/ingredients/PriceInputSheet";
 import { ReceiptFlowPage } from "@/pages/ingredients/ReceiptFlowPage";
 
 import { useOnboarding } from "./onboardingContext";
@@ -12,6 +14,13 @@ export function ReceiptPhotoPage() {
   const { store, receiptPhotoCount, addReceiptPhotos, salesConfirmed } = useOnboarding();
   const { state } = useLocation();
   const fromCompletion = state?.fromCompletion === true;
+  const [isUploadSheetOpen, setIsUploadSheetOpen] = useState(false);
+
+  // 영수증 화면에서 돌아왔을 때 시트가 다시 떠 있지 않게 닫고 넘어간다.
+  function openReceiptFlow(entry: { scanId?: string; photoCount?: number }) {
+    setIsUploadSheetOpen(false);
+    navigate(".", { state: { fromCompletion, isCapturingReceipt: true, ...entry } });
+  }
 
   function leaveReceipt(path: string) {
     if (fromCompletion) {
@@ -71,15 +80,13 @@ export function ReceiptPhotoPage() {
       </OnboardingHeading>
       <div className="grid gap-4">
         <div className="grid gap-2.5 rounded-md bg-surface-receipt-action px-5 py-6 text-center">
-          <OnboardingButton
-            onClick={() => navigate(".", { state: { fromCompletion, isCapturingReceipt: true } })}
-          >
-            영수증 사진 찍기
+          <OnboardingButton onClick={() => setIsUploadSheetOpen(true)}>
+            영수증 추가하기
           </OnboardingButton>
           <p role="status" className="text-body-s text-text-information">
             {receiptPhotoCount > 0
               ? "거래처 영수증을 반영했어요"
-              : "여러 장 연속 촬영으로 이어져요"}
+              : "카메라로 찍거나 앨범에서 고를 수 있어요"}
           </p>
         </div>
         <section className="grid gap-3 rounded-md border border-button-subtle p-4">
@@ -96,6 +103,16 @@ export function ReceiptPhotoPage() {
           </InfoBox>
         </section>
       </div>
+      {store && isUploadSheetOpen && (
+        <PriceInputSheet
+          storeId={store.id}
+          initialStep="upload"
+          onClose={() => setIsUploadSheetOpen(false)}
+          onCamera={() => openReceiptFlow({})}
+          // 앨범 사진은 이미 올렸으니 영수증 화면을 확인 단계부터 연다.
+          onAlbumUploaded={openReceiptFlow}
+        />
+      )}
     </OnboardingScreen>
   );
 }
