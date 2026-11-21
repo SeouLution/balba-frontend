@@ -40,7 +40,7 @@ export function IngredientLoadingPage() {
       <OnboardingScreen
         step={3}
         preparingIngredients
-        onBack={() => navigate("../columns")}
+        onBack={() => navigate("../upload")}
         footer={
           <OnboardingButton disabled={recipes.isFetching} onClick={() => void recipes.refetch()}>
             다시 확인
@@ -54,7 +54,7 @@ export function IngredientLoadingPage() {
   }
 
   return (
-    <OnboardingScreen step={3} wideCard preparingIngredients onBack={() => navigate("../columns")}>
+    <OnboardingScreen step={3} wideCard preparingIngredients onBack={() => navigate("../upload")}>
       <OnboardingHeading
         title={
           <>

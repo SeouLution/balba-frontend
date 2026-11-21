@@ -40,9 +40,8 @@ export function useConfirmSalesImport(storeId: string, importId: string) {
 
   return useMutation({
     mutationFn: () => confirmSalesImport(storeId, importId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["salesImport", storeId, importId] });
-    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["salesImport", storeId, importId] }),
   });
 }
 

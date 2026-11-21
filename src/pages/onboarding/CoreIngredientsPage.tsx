@@ -91,7 +91,7 @@ export function CoreIngredientsPage() {
       wideCard
       scrollBody
       progressPercent={48.75}
-      onBack={() => navigate("../columns")}
+      onBack={() => navigate("../upload")}
       footer={
         recipes.isError ? (
           <OnboardingButton disabled={recipes.isFetching} onClick={() => void recipes.refetch()}>

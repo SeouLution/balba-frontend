@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { Navigate, useNavigate } from "react-router";
 
 import { ApiError } from "@/api/client";
 import { Loading } from "@/components/Loading";
@@ -24,6 +24,10 @@ export function SalesColumnsPage() {
   const [editing, setEditing] = useState(false);
   const { data, error, isError, isFetching, refetch } = salesImport;
   const goBack = () => navigate("../upload");
+
+  if (data?.status === "COMPLETED") {
+    return <Navigate to="../ingredients/loading" replace />;
+  }
 
   if (isError && !editing) {
     return (
@@ -63,13 +67,12 @@ export function SalesColumnsPage() {
     );
   }
 
-  const completed = data.status === "COMPLETED";
   const mapping = data.detection?.columnMapping;
   const columns = data.detection?.columns;
   const preview = data.detection?.preview;
   const ready = salesColumns.every(({ key }) => Boolean(mapping?.[key]));
   const canConfirm = ready && (data.recordCount ?? 0) > 0;
-  const canEdit = !completed && columns?.some(Boolean);
+  const canEdit = columns?.some(Boolean);
 
   if (editing && canEdit && columns && mapping && store && salesUpload) {
     return (
@@ -103,40 +106,33 @@ export function SalesColumnsPage() {
       scrollBody
       onBack={confirm.isPending ? undefined : goBack}
       footer={
-        completed ? (
-          <OnboardingButton onClick={() => navigate("../ingredients/loading")}>
-            다음
-          </OnboardingButton>
-        ) : (
-          <>
-            {canConfirm && (
-              <OnboardingButton disabled={confirm.isPending} onClick={() => confirm.mutate()}>
-                {confirm.isPending ? "확인 중…" : "맞아요, 다음"}
-              </OnboardingButton>
-            )}
-            {canEdit && (
-              <OnboardingButton
-                secondary={canConfirm}
-                disabled={confirm.isPending}
-                onClick={() => {
-                  confirm.reset();
-                  setEditing(true);
-                }}
-              >
-                칸 고치기
-              </OnboardingButton>
-            )}
-          </>
-        )
+        <>
+          {canConfirm && (
+            <OnboardingButton disabled={confirm.isPending} onClick={() => confirm.mutate()}>
+              {confirm.isPending ? "확인 중…" : "맞아요, 다음"}
+            </OnboardingButton>
+          )}
+          {canEdit && (
+            <OnboardingButton
+              secondary={canConfirm}
+              disabled={confirm.isPending}
+              onClick={() => {
+                confirm.reset();
+                setEditing(true);
+              }}
+            >
+              칸 고치기
+            </OnboardingButton>
+          )}
+        </>
       }
     >
-      <OnboardingHeading title={completed ? "판매 기록을 반영했어요" : "이렇게 읽었는데 맞나요?"}>
-        {!completed &&
-          (canConfirm
-            ? "판별한 열과 판매 기록을 확인해 주세요."
-            : canEdit
-              ? "판매 기록을 읽으려면 날짜, 메뉴 이름, 판매 수량에 맞는 칸을 골라주세요."
-              : "날짜, 메뉴 이름, 판매 수량이 들어 있는 파일을 다시 올려주세요.")}
+      <OnboardingHeading title="이렇게 읽었는데 맞나요?">
+        {canConfirm
+          ? "판별한 열과 판매 기록을 확인해 주세요."
+          : canEdit
+            ? "판매 기록을 읽으려면 날짜, 메뉴 이름, 판매 수량에 맞는 칸을 골라주세요."
+            : "날짜, 메뉴 이름, 판매 수량이 들어 있는 파일을 다시 올려주세요."}
       </OnboardingHeading>
       {confirm.isError && (
         <OnboardingError>판매 기록을 확정하지 못했어요. 다시 시도해 주세요.</OnboardingError>
