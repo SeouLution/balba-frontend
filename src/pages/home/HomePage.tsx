@@ -15,7 +15,6 @@ import { HomeBanners } from "./HomeBanners";
 import { formatMonthDayWeekday } from "./homeFormat";
 import { NearbyEventsSheet } from "./NearbyEventsSheet";
 import { NextOrderNotice, OrderSummaryCard, ReceiptPromptCard } from "./OrderCards";
-import { SettingsMenu } from "./SettingsMenu";
 import { WeatherRow } from "./WeatherRow";
 
 /** 2.0-1 전날 저녁(TOMORROW) · 2.2 당일 아침(TODAY). 어느 쪽인지는 서버의 view를 따른다. */
@@ -119,7 +118,7 @@ function HomeError({ error, retry }: { error: Error; retry: () => void }) {
 function HomeLayout({ storeName, children }: { storeName?: string; children: ReactNode }) {
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-bg-page">
-      <StoreHeader storeName={storeName ?? ""} actions={<SettingsMenu />} className="bg-bg-page" />
+      <StoreHeader storeName={storeName ?? ""} className="bg-bg-page" />
       <main className="flex flex-1 flex-col gap-4 px-4 pb-6">{children}</main>
       <AppTabBar />
     </div>
