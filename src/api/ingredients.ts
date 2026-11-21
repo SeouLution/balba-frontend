@@ -24,20 +24,12 @@ export type IngredientSummary = {
   supplier?: { id: string; name: string } | null;
 };
 
-export type IngredientAlert = {
-  id: string;
-  type: "EXPIRY_IMMINENT" | "PRICE_CHANGED";
-  title: string;
-  message?: string;
-};
-
 export type IngredientList = {
   items: IngredientSummary[];
   counts: {
     core?: number;
     later?: number;
   };
-  notices?: IngredientAlert[];
 };
 
 export function listIngredients(storeId: string, status?: IngredientStatus) {
