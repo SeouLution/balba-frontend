@@ -19,6 +19,8 @@ export {
   ChevronUp,
   Clock,
   CloudRain,
+  Eye,
+  EyeOff,
   House,
   Minus,
   Pen,
