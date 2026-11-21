@@ -30,9 +30,7 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (!response.ok) {
     throw new ApiError(response.status, await readErrorCode(response));
   }
-  // 204는 본문이 없어서 json()을 부르면 실패한다.
-  if (response.status === 204) {
-    return undefined as T;
-  }
-  return (await response.json()) as T;
+  // 204 · 본문 없는 202(confirm 등)는 json()을 부르면 실패하므로 글자로 먼저 읽는다.
+  const body = await response.text();
+  return (body ? JSON.parse(body) : undefined) as T;
 }

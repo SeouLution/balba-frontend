@@ -4,15 +4,18 @@ import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { useStoreId } from "@/hooks/useStoreId";
 
 import { CaptureStep } from "./CaptureStep";
-import { ClassifyStep } from "./ClassifyStep";
-import { ScheduleStep } from "./ScheduleStep";
+import { ReceiptReviewStep } from "./ReceiptReviewStep";
 
 const DEFAULT_RETURN_PATH = "/ingredients";
 
-type ReceiptFlowStep =
-  { name: "capture" } | { name: "classify"; scanId: string } | { name: "schedule"; scanId: string };
+type ReceiptFlowStep = { name: "capture" } | { name: "review"; scanId: string };
 
-/** 3.5 → 3.6 → 3.7 영수증 흐름. 진입: /receipt?returnTo=돌아갈경로 */
+/** 돌아간 화면이 읽는 값. 재료 탭은 이걸로 "정보가 입력됐어요" 카드를 띄운다. */
+export type ReceiptFlowResult = {
+  receiptIngredientNames: string[];
+};
+
+/** 영수증 연속 촬영 → 읽기 · 저장. 진입: /receipt?returnTo=돌아갈경로 */
 export function ReceiptFlowPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,9 +23,10 @@ export function ReceiptFlowPage() {
   const storeId = useStoreId();
   const [step, setStep] = useState<ReceiptFlowStep>({ name: "capture" });
 
-  function finishFlow() {
+  function finishFlow(ingredientNames: string[]) {
+    const result: ReceiptFlowResult = { receiptIngredientNames: ingredientNames };
     // 끝난 흐름으로 뒤로 가기 되지 않도록 기록을 바꿔치기한다.
-    navigate(readReturnPath(searchParams.get("returnTo")), { replace: true });
+    navigate(readReturnPath(searchParams.get("returnTo")), { replace: true, state: result });
   }
 
   function leaveFlow() {
@@ -40,27 +44,17 @@ export function ReceiptFlowPage() {
       <CaptureStep
         storeId={storeId}
         onBack={leaveFlow}
-        onUploaded={(scanId) => setStep({ name: "classify", scanId })}
-      />
-    );
-  }
-
-  if (step.name === "classify") {
-    return (
-      <ClassifyStep
-        storeId={storeId}
-        scanId={step.scanId}
-        onBack={() => setStep({ name: "capture" })}
-        onConfirmed={() => setStep({ name: "schedule", scanId: step.scanId })}
+        onUploaded={(scanId) => setStep({ name: "review", scanId })}
       />
     );
   }
 
   return (
-    <ScheduleStep
+    <ReceiptReviewStep
       storeId={storeId}
-      onBack={() => setStep({ name: "classify", scanId: step.scanId })}
-      onSaved={finishFlow}
+      scanId={step.scanId}
+      onBack={() => setStep({ name: "capture" })}
+      onConfirmed={finishFlow}
     />
   );
 }

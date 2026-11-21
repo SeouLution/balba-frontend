@@ -54,6 +54,12 @@ body {
     margin-inline-start: auto;
   }
 
+  /* 항목이 많은 드롭다운(월 · 일 등): 목록을 5줄 정도로 줄이고 나머지는 스크롤 */
+  .form-select-scroll::picker(select) {
+    max-height: 15rem;
+    overflow-y: auto;
+  }
+
   .form-select::picker(select) {
     margin-block: var(--spacing);
     padding: var(--spacing);
