@@ -59,7 +59,8 @@ function UploadStep({ storeId, onBack, onUploaded }: UploadStepProps) {
             onClick={() =>
               file && createSalesImport.mutate(file, { onSuccess: ({ id }) => onUploaded(id) })
             }
-            className="w-full"
+            // 공통 틀은 PC에서 아래 버튼을 오른쪽 320px로 줄이지만, 이 화면은 입력칸 폭에 맞춰 넓게 둔다.
+            className="w-full md:max-w-none!"
           >
             {createSalesImport.isPending ? "올리는 중이에요" : "올리기"}
           </Button>
