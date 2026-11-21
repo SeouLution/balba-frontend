@@ -85,7 +85,6 @@ export function HomePage() {
 function HomeLayout({ storeName, children }: { storeName?: string; children: ReactNode }) {
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-bg-page">
-      {/* TODO: 가게 설정 화면이 생기면 onSettingsClick을 연결한다. */}
       <StoreHeader storeName={storeName ?? ""} className="bg-bg-page" />
       <main className="flex flex-1 flex-col gap-4 px-4 pb-6">{children}</main>
       <AppTabBar />
