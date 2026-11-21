@@ -27,6 +27,9 @@ type PriceInputSheetProps = {
   initialStep?: SheetStep;
   onClose: () => void;
   onDirectInput?: () => void;
+  // 주지 않으면 재료 탭의 영수증 화면(/receipt)으로 간다. 온보딩은 자기 화면 안에서 연다.
+  onCamera?: () => void;
+  onAlbumUploaded?: (entry: ReceiptFlowEntryState) => void;
 };
 
 /** 단가 정보 입력(직접 입력 · 영수증) → 업로드 방식 선택(카메라 · 앨범) 바텀시트 */
@@ -35,6 +38,8 @@ export function PriceInputSheet({
   initialStep = "choose",
   onClose,
   onDirectInput,
+  onCamera,
+  onAlbumUploaded,
 }: PriceInputSheetProps) {
   const navigate = useNavigate();
   const showToast = useToast();
@@ -62,8 +67,9 @@ export function PriceInputSheet({
     }
     createReceiptScan.mutate(images, {
       onSuccess: ({ id }) => {
-        const state: ReceiptFlowEntryState = { scanId: id, photoCount: images.length };
-        navigate(RECEIPT_FLOW_PATH, { state });
+        const entry: ReceiptFlowEntryState = { scanId: id, photoCount: images.length };
+        if (onAlbumUploaded) onAlbumUploaded(entry);
+        else navigate(RECEIPT_FLOW_PATH, { state: entry });
       },
       onError: () => showToast("사진을 올리지 못했어요. 다시 시도해 주세요."),
     });
@@ -130,7 +136,7 @@ export function PriceInputSheet({
               title="카메라로 촬영하기"
               description="지금 영수증을 바로 찍어요"
               disabled={createReceiptScan.isPending}
-              onClick={() => navigate(RECEIPT_FLOW_PATH)}
+              onClick={onCamera ?? (() => navigate(RECEIPT_FLOW_PATH))}
             />
             <UploadOption
               icon={<ImageIcon size={24} aria-hidden />}
