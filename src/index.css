@@ -1,1 +1,50 @@
 @import "tailwindcss";
+
+@theme {
+  --color-form-navy: #192b49;
+  --color-form-navy-hover: #2b4368;
+  --color-form-navy-pressed: #101d33;
+  --color-form-navy-soft: #eef2f8;
+  --color-form-ink: #17243a;
+  --color-form-muted: #596578;
+  --color-form-border: #aeb7c4;
+  --color-form-surface: #fff;
+  --color-form-disabled: #edf0f4;
+  --color-form-off: #6b7789;
+  --color-form-danger: #ae2828;
+  --color-form-danger-soft: #fff1f1;
+  --spacing-form-button: 56px;
+  --spacing-form-field: 52px;
+  --spacing-form-touch: 44px;
+  --radius-form: 16px;
+}
+
+@supports (appearance: base-select) {
+  .form-select,
+  .form-select::picker(select) {
+    appearance: base-select;
+  }
+
+  .form-select {
+    display: flex;
+    align-items: center;
+  }
+
+  .form-select::picker-icon {
+    display: none;
+  }
+
+  .form-select option::checkmark {
+    order: 1;
+    margin-inline-start: auto;
+  }
+
+  .form-select::picker(select) {
+    margin-block: var(--spacing);
+    padding: var(--spacing);
+    border: 1px solid var(--color-form-border);
+    border-radius: var(--radius-form);
+    background: var(--color-form-surface);
+    color: var(--color-form-ink);
+  }
+}
