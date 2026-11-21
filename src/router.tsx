@@ -1,14 +1,15 @@
 import { createBrowserRouter } from "react-router";
 
+import { AppLayout } from "@/components/AppLayout";
 import { RequireStore } from "@/components/RequireStore";
 import { HomePage } from "@/pages/home/HomePage";
-import { MyPage } from "@/pages/my/MyPage";
 import { IngredientPriceFormPage } from "@/pages/ingredients/IngredientPriceFormPage";
 import { IngredientsPage } from "@/pages/ingredients/IngredientsPage";
 import { MenuAddPage } from "@/pages/ingredients/MenuAddPage";
 import { MenuReviewPage } from "@/pages/ingredients/MenuReviewPage";
 import { ReceiptFlowPage } from "@/pages/ingredients/ReceiptFlowPage";
 import { RecipeEditPage } from "@/pages/ingredients/RecipeEditPage";
+import { MyPage } from "@/pages/my/MyPage";
 import { CoreIngredientsPage } from "@/pages/onboarding/CoreIngredientsPage";
 import { IngredientLoadingPage } from "@/pages/onboarding/IngredientLoadingPage";
 import { LoginPage } from "@/pages/onboarding/LoginPage";
@@ -37,17 +38,22 @@ export const router = createBrowserRouter([
     // 가게 id가 필요한 앱 화면. 로그인한 계정의 가게를 불러온 뒤에 그린다.
     element: <RequireStore />,
     children: [
-      { path: "/home", element: <HomePage /> },
-      { path: "/ingredients", element: <IngredientsPage /> },
-      { path: "/ingredients/recipes/:menuId", element: <RecipeEditPage /> },
-      { path: "/ingredients/:ingredientId/price", element: <IngredientPriceFormPage /> },
-      { path: "/ingredients/menus/new", element: <MenuAddPage /> },
-      { path: "/ingredients/menus/review", element: <MenuReviewPage /> },
-      { path: "/receipt", element: <ReceiptFlowPage /> },
-      { path: "/order", element: <OrderPage /> },
-      { path: "/order/new", element: <OrderEditPage /> },
-      { path: "/order/share", element: <OrderSharePage /> },
-      { path: "/my", element: <MyPage /> },
+      {
+        element: <AppLayout />,
+        children: [
+          { path: "/home", element: <HomePage /> },
+          { path: "/ingredients", element: <IngredientsPage /> },
+          { path: "/ingredients/recipes/:menuId", element: <RecipeEditPage /> },
+          { path: "/ingredients/:ingredientId/price", element: <IngredientPriceFormPage /> },
+          { path: "/ingredients/menus/new", element: <MenuAddPage /> },
+          { path: "/ingredients/menus/review", element: <MenuReviewPage /> },
+          { path: "/receipt", element: <ReceiptFlowPage /> },
+          { path: "/order", element: <OrderPage /> },
+          { path: "/order/new", element: <OrderEditPage /> },
+          { path: "/order/share", element: <OrderSharePage /> },
+          { path: "/my", element: <MyPage /> },
+        ],
+      },
     ],
   },
   {

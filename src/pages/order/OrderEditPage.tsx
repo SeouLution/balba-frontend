@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AppPanel } from "@/components/AppPanel";
 import { useNavigate, useSearchParams } from "react-router";
 
 import type { OrderLine, OrderPlan, OrderPlanSupplier } from "@/api/orderPlans";
@@ -38,7 +39,7 @@ export function OrderEditPage() {
   const closing = home ? findTodayClosing(home.view, home.targetDate, home.businessHours) : null;
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-button-surface-1">
+    <AppPanel>
       <OrderHeader
         title="내일 발주"
         subtitle={closing ? `오늘 ${formatSpokenTime(closing.close)}까지` : undefined}
@@ -52,7 +53,7 @@ export function OrderEditPage() {
       ) : (
         <OrderEditForm storeId={storeId} plan={orderPlanQuery.data} />
       )}
-    </div>
+    </AppPanel>
   );
 }
 
@@ -111,7 +112,7 @@ function OrderEditForm({ storeId, plan }: { storeId: string; plan: OrderPlan }) 
 
   return (
     <>
-      <main className="flex flex-1 flex-col gap-4 px-5 pb-6">
+      <main className="flex flex-1 flex-col gap-4 px-5 pb-6 md:px-8">
         <EventNotice plan={plan} />
         {plan.suppliers.map(({ supplier, lines }) => (
           <section
@@ -145,7 +146,7 @@ function OrderEditForm({ storeId, plan }: { storeId: string; plan: OrderPlan }) 
           </section>
         ))}
       </main>
-      <div className="sticky bottom-0 bg-button-surface-1 px-5 pt-2 pb-6">
+      <div className="sticky bottom-0 bg-button-surface-1 px-5 pt-2 pb-6 md:grid md:justify-items-end md:rounded-b-lg md:px-8 md:[&>button]:max-w-80 md:[&>p]:justify-self-stretch">
         {createPurchaseOrders.isError && (
           <p className="pb-2 text-center text-caption text-danger-subtle-text">
             발주서를 만들지 못했어요. 다시 눌러 주세요.

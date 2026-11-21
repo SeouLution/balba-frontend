@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 
+import { AppPanel } from "@/components/AppPanel";
 import { AppTabBar } from "@/components/AppTabBar";
 import { Plus } from "@/components/icons";
 import { useStoreId } from "@/hooks/useStoreId";
@@ -25,9 +26,9 @@ export function IngredientsPage() {
   const [isBulkSheetOpen, setIsBulkSheetOpen] = useState(false);
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-button-surface-1">
-      <header className="flex h-16 items-center justify-between px-5">
-        <h1 className="text-label-l font-semibold text-button-primary">재료</h1>
+    <AppPanel wide>
+      <header className="flex h-16 items-center justify-between px-5 md:h-20 md:px-8">
+        <h1 className="text-label-l font-semibold text-button-primary desktop:text-title">재료</h1>
         {tab === "ingredients" && (
           <button
             type="button"
@@ -49,8 +50,8 @@ export function IngredientsPage() {
         )}
       </header>
 
-      <main className="flex flex-1 flex-col gap-4 px-5 pb-6">
-        <div role="tablist" aria-label="재료 보기" className="grid grid-cols-2 gap-2">
+      <main className="flex flex-1 flex-col gap-4 px-5 pb-6 md:px-8 md:pb-8">
+        <div role="tablist" aria-label="재료 보기" className="grid grid-cols-2 gap-2 md:w-80">
           <TabButton
             selected={tab === "menus"}
             onClick={() => setSearchParams({ tab: "menus" }, { replace: true })}
@@ -85,7 +86,7 @@ export function IngredientsPage() {
         />
       )}
       <AppTabBar />
-    </div>
+    </AppPanel>
   );
 }
 

@@ -44,7 +44,7 @@ export function MenuRecipeListView({ storeId }: { storeId: string }) {
           아직 메뉴가 없어요. 판매 엑셀을 올려 메뉴를 추가해 주세요.
         </p>
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className="grid items-start gap-3 md:grid-cols-2">
           {recipes.map((recipe) => (
             <RecipeCard
               key={recipe.menu.id}

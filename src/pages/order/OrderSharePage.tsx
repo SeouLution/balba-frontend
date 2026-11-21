@@ -1,5 +1,6 @@
 import { Navigate, useLocation, useNavigate } from "react-router";
 
+import { AppPanel } from "@/components/AppPanel";
 import type { PurchaseOrder } from "@/api/purchaseOrders";
 import { Button } from "@/components";
 import { useToast } from "@/components/toast/useToast";
@@ -28,13 +29,13 @@ export function OrderSharePage() {
   if (!state) return <Navigate to="/order" replace />;
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-button-surface-1">
+    <AppPanel>
       <OrderHeader
         title="발주서 공유"
         subtitle={closing ? `오늘 ${formatSpokenTime(closing.close)}까지` : undefined}
         onBack={() => navigate("/order", { replace: true })}
       />
-      <main className="flex flex-1 flex-col gap-4 px-5 pb-6">
+      <main className="flex flex-1 flex-col gap-4 px-5 pb-6 md:px-8">
         <h2 className="text-subtitle text-button-primary">
           발주서를 참고하여
           <br />
@@ -48,12 +49,12 @@ export function OrderSharePage() {
           />
         ))}
       </main>
-      <div className="sticky bottom-0 bg-button-surface-1 px-5 pt-2 pb-6">
+      <div className="sticky bottom-0 bg-button-surface-1 px-5 pt-2 pb-6 md:grid md:justify-items-end md:rounded-b-lg md:px-8 md:[&>button]:max-w-80 md:[&>p]:justify-self-stretch">
         <Button onClick={() => navigate("/order", { replace: true })} className="w-full">
           주문 완료
         </Button>
       </div>
-    </div>
+    </AppPanel>
   );
 }
 

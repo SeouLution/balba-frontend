@@ -16,6 +16,8 @@ body {
 }
 
 @theme {
+  --breakpoint-desktop: 64.0625rem;
+
   --color-form-navy: #192b49;
   --color-form-navy-hover: #2b4368;
   --color-form-navy-pressed: #101d33;

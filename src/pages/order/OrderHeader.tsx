@@ -13,7 +13,7 @@ export function OrderHeader({ title, subtitle, onBack }: OrderHeaderProps) {
   const navigate = useNavigate();
 
   return (
-    <header className="flex h-20 items-center gap-3 px-3">
+    <header className="flex h-20 items-center gap-3 px-3 md:px-6">
       <button
         type="button"
         aria-label="뒤로 가기"
