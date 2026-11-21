@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 
 import type { HomeView, WeatherCondition, WeatherSummary } from "@/api/home";
-import { Cloud, CloudRain, CloudSnow, CloudSun, Sun } from "@/components/icons";
+import { ChevronRight, Cloud, CloudRain, CloudSnow, CloudSun, Sun } from "@/components/icons";
 import { cn } from "@/utils/cn";
 
 const WEATHER_ICONS: Record<WeatherCondition, LucideIcon> = {
@@ -16,21 +16,46 @@ const WEATHER_ICONS: Record<WeatherCondition, LucideIcon> = {
 
 type WeatherRowProps = {
   view: HomeView;
-  weather: WeatherSummary;
+  weather?: WeatherSummary;
+  eventCount: number;
+  onEventsClick: () => void;
 };
 
-export function WeatherRow({ view, weather }: WeatherRowProps) {
-  const Icon = WEATHER_ICONS[weather.condition];
-  const isChanged = Boolean(weather.changeText);
+/** 날씨 줄과 "7일 이내 열리는 행사" 줄. 둘 다 없으면 그리지 않는다. */
+export function WeatherRow({ view, weather, eventCount, onEventsClick }: WeatherRowProps) {
+  if (!weather && eventCount === 0) return null;
+  const isChanged = Boolean(weather?.changeText);
 
   return (
     <section
       className={cn(
-        "rounded-lg bg-button-surface-1 px-4 py-3.5",
+        "divide-y divide-border-divider rounded-lg bg-button-surface-1 px-4",
         // 밤사이 예보가 바뀌었으면 테두리로 강조한다.
         isChanged ? "border-3 border-border-primary" : "border border-border-grey",
       )}
     >
+      {weather && <WeatherLine view={view} weather={weather} />}
+      {/* 행사가 0건이면 행사 줄 자체를 숨긴다. */}
+      {eventCount > 0 && (
+        <button
+          type="button"
+          onClick={onEventsClick}
+          className="flex w-full items-center gap-2 py-3.5 text-left outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20"
+        >
+          <span className="flex-1 text-body-m text-text-gray">7일 이내 열리는 행사</span>
+          <span className="text-label-l text-text-black">{eventCount}건</span>
+          <ChevronRight size={22} aria-hidden className="text-text-gray" />
+        </button>
+      )}
+    </section>
+  );
+}
+
+function WeatherLine({ view, weather }: { view: HomeView; weather: WeatherSummary }) {
+  const Icon = WEATHER_ICONS[weather.condition];
+
+  return (
+    <div className="py-3.5">
       <div className="flex items-center gap-2">
         <span className="flex-1 text-body-m text-text-gray">
           {view === "TOMORROW" ? "내일 날씨" : "오늘 날씨"}
@@ -42,6 +67,6 @@ export function WeatherRow({ view, weather }: WeatherRowProps) {
       {weather.changeText && (
         <p className="mt-1 text-right text-caption text-text-gray-darker">{weather.changeText}</p>
       )}
-    </section>
+    </div>
   );
 }

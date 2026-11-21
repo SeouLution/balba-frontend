@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import type { ForecastItem, Home } from "@/api/home";
 import { Badge } from "@/components/Badge";
-import { ArrowDown, ArrowUp } from "@/components/icons";
+import { ArrowDown, ArrowUp, ChevronDown, ChevronUp } from "@/components/icons";
 import { useAdjustForecast } from "@/hooks/useHome";
 import { cn } from "@/utils/cn";
 
@@ -56,44 +56,87 @@ export function ForecastCard({ storeId, home }: ForecastCardProps) {
   );
 }
 
+// 홈에서 처음에 펼쳐 보여줄 메뉴 수
+const VISIBLE_COUNT = 3;
+
 function EditableForecastList({ storeId, home }: ForecastCardProps) {
   const adjustForecast = useAdjustForecast(storeId, home.targetDate);
+  const { items } = home.forecast;
+  // 첫 메뉴만 펼친 채로 시작한다.
+  const [openMenuIds, setOpenMenuIds] = useState(
+    () => new Set(items.slice(0, 1).map((item) => item.menu.id)),
+  );
+  const [showAll, setShowAll] = useState(false);
+  // TODO(api): 홈은 상위 3개 메뉴만 준다. totalMenuCount만큼 더보려면 전체 예측 API가 필요하다.
+  const hiddenCount = items.length - VISIBLE_COUNT;
+  const visibleItems = showAll ? items : items.slice(0, VISIBLE_COUNT);
+
+  function toggle(menuId: string) {
+    setOpenMenuIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(menuId)) next.delete(menuId);
+      else next.add(menuId);
+      return next;
+    });
+  }
 
   return (
-    <ul className="mt-4 divide-y divide-border-divider border-t border-border-divider">
-      {home.forecast.items.map((item) => {
-        const hint = describeForecastChange(item, home.view);
+    <>
+      <ul className="mt-4 divide-y divide-border-divider border-b border-border-divider">
+        {visibleItems.map((item) => {
+          const isOpen = openMenuIds.has(item.menu.id);
+          const panelId = `forecast-panel-${item.menu.id}`;
 
-        return (
-          <li key={item.menu.id} className="flex items-center gap-3 py-4">
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <p
-                  className={cn("text-label-l text-text-black", isResting(item) && "line-through")}
-                >
-                  {item.menu.name}
-                </p>
-                {hint && <Badge type={hint.direction ?? "soft"}>{hint.text}</Badge>}
-              </div>
-              {item.summaryText && (
-                <p className="mt-1 text-body-s text-text-gray-darker">{item.summaryText}</p>
+          return (
+            <li key={item.menu.id} className="py-4">
+              <button
+                type="button"
+                aria-expanded={isOpen}
+                aria-controls={panelId}
+                onClick={() => toggle(item.menu.id)}
+                className="flex w-full items-center gap-3 rounded-sm text-left outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20"
+              >
+                <ForecastSummary item={item} view={home.view} />
+                {isOpen ? (
+                  <ChevronUp size={22} aria-hidden className="text-text-gray" />
+                ) : (
+                  <ChevronDown size={22} aria-hidden className="text-text-gray" />
+                )}
+              </button>
+              {isOpen && (
+                <div id={panelId} className="mt-3 flex flex-col gap-3">
+                  {item.summaryText && <ReasonBox>{item.summaryText}</ReasonBox>}
+                  <QuantityInput
+                    // 서버 값이 바뀌면(저장 성공 · 실패 되돌림) 입력칸을 새 값으로 다시 그린다.
+                    key={`${item.menu.id}-${item.planned}`}
+                    item={item}
+                    onCommit={(quantity) =>
+                      adjustForecast.mutate({ menuId: item.menu.id, quantity })
+                    }
+                  />
+                </div>
               )}
-            </div>
-            <QuantityInput
-              // 서버 값이 바뀌면(저장 성공 · 실패 되돌림) 입력칸을 새 값으로 다시 그린다.
-              key={`${item.menu.id}-${item.planned}`}
-              item={item}
-              onCommit={(quantity) => adjustForecast.mutate({ menuId: item.menu.id, quantity })}
-            />
-          </li>
-        );
-      })}
+            </li>
+          );
+        })}
+      </ul>
       {adjustForecast.isError && (
-        <li className="pt-3 text-caption text-danger-subtle-text">
+        <p className="pt-3 text-caption text-danger-subtle-text">
           준비량을 저장하지 못했어요. 다시 입력해 주세요.
-        </li>
+        </p>
       )}
-    </ul>
+      {hiddenCount > 0 && (
+        <button
+          type="button"
+          aria-expanded={showAll}
+          onClick={() => setShowAll((prev) => !prev)}
+          className="mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-sm border border-border-grey text-label-l font-semibold text-text-black outline-none hover:bg-bg-hover focus-visible:ring-4 focus-visible:ring-button-primary/20"
+        >
+          {showAll ? <ChevronUp size={20} aria-hidden /> : <ChevronDown size={20} aria-hidden />}
+          {showAll ? "접기" : `${hiddenCount}개 더보기`}
+        </button>
+      )}
+    </>
   );
 }
 
@@ -119,7 +162,7 @@ function QuantityInput({ item, onCommit }: QuantityInputProps) {
   }
 
   return (
-    <label className="flex shrink-0 items-center gap-2">
+    <div className="flex gap-3">
       <input
         type="text"
         inputMode="numeric"
@@ -130,10 +173,13 @@ function QuantityInput({ item, onCommit }: QuantityInputProps) {
         onKeyDown={(event) => {
           if (event.key === "Enter") event.currentTarget.blur();
         }}
-        className="h-12 w-16 rounded-sm border border-border-grey bg-button-surface-1 px-3 text-label-l text-text-black tabular-nums outline-none focus:border-border-primary focus-visible:ring-4 focus-visible:ring-button-primary/20"
+        className="h-14 min-w-0 flex-1 rounded-sm border border-border-primary bg-button-surface-1 px-4 text-label-l text-text-black tabular-nums outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20"
       />
-      <span className="text-label-l text-text-black">{item.unit}</span>
-    </label>
+      {/* 메뉴 단위는 서버가 정한다(항상 인분). 고를 수 없어서 글자로만 보여준다. */}
+      <span className="flex h-14 w-28 shrink-0 items-center rounded-sm border border-border-grey px-4 text-label-l text-text-black">
+        {item.unit}
+      </span>
+    </div>
   );
 }
 

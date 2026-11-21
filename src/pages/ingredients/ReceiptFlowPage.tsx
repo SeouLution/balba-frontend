@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 
-import { useStoreId } from "@/hooks/useStoreId";
+import { useOptionalStoreId } from "@/hooks/useStoreId";
 
 import { CaptureStep } from "./CaptureStep";
 import { ReceiptReviewStep } from "./ReceiptReviewStep";
@@ -26,9 +26,11 @@ export function ReceiptFlowPage({ storeId: entryStoreId, onBack, onSaved }: Rece
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const currentStoreId = useStoreId();
+  // 온보딩은 storeId를 직접 넘기고, 재료 탭은 RequireStore가 준 값을 쓴다.
+  const currentStoreId = useOptionalStoreId();
   const storeId = entryStoreId ?? currentStoreId;
   const [step, setStep] = useState<ReceiptFlowStep>({ name: "capture" });
+  if (!storeId) throw new Error("ReceiptFlowPage에는 가게 id가 필요해요.");
 
   function finishFlow(ingredientNames: string[]) {
     const result: ReceiptFlowResult = { receiptIngredientNames: ingredientNames };

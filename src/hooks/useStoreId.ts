@@ -1,11 +1,17 @@
-// openapi.yaml 예시값. 운영 · 로컬 백엔드에는 없는 가게라 실제 API에서는 NOT_FOUND가 난다.
-const FALLBACK_STORE_ID = "st_8f2k1";
+import { useContext } from "react";
 
-/**
- * 지금 가게 id.
- * 테스트할 때는 .env.local의 VITE_STORE_ID로 바꿔 끼운다(POST /v1/stores로 만든 id).
- * TODO: A와 storeId 보관 방식(가입 · 1.1 createStore 응답)을 정하면 이 훅 안만 바꾼다.
- */
+import { StoreIdContext } from "./storeIdContext";
+
+/** 로그인한 계정의 가게 id. RequireStore 아래 화면에서만 쓸 수 있다. */
 export function useStoreId() {
-  return import.meta.env.VITE_STORE_ID || FALLBACK_STORE_ID;
+  const storeId = useContext(StoreIdContext);
+  if (!storeId) {
+    throw new Error("useStoreId는 RequireStore 안에서만 쓸 수 있어요.");
+  }
+  return storeId;
+}
+
+/** RequireStore 밖(온보딩 등)에서도 부를 수 있는 버전. 가게 id가 없으면 null */
+export function useOptionalStoreId() {
+  return useContext(StoreIdContext);
 }

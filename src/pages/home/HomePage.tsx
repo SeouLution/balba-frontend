@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Navigate } from "react-router";
 
 import { ApiError } from "@/api/client";
@@ -7,28 +7,23 @@ import { AppTabBar } from "@/components/AppTabBar";
 import { Loading } from "@/components/Loading";
 import { StoreHeader } from "@/components/StoreHeader";
 import { useHome } from "@/hooks/useHome";
-import { useMe } from "@/hooks/useMe";
+import { useStoreId } from "@/hooks/useStoreId";
 
 import { DeadlineChip } from "./DeadlineChip";
 import { ForecastCard } from "./ForecastCard";
 import { HomeBanners } from "./HomeBanners";
 import { formatMonthDayWeekday } from "./homeFormat";
+import { NearbyEventsSheet } from "./NearbyEventsSheet";
 import { NextOrderNotice, OrderSummaryCard, ReceiptPromptCard } from "./OrderCards";
+import { SettingsMenu } from "./SettingsMenu";
 import { WeatherRow } from "./WeatherRow";
 
 /** 2.0-1 전날 저녁(TOMORROW) · 2.2 당일 아침(TODAY). 어느 쪽인지는 서버의 view를 따른다. */
+// 로그인 · 가게 확인은 RequireStore가 먼저 한다.
 export function HomePage() {
-  const me = useMe();
-
-  if (me.isPending || (!me.isFetchedAfterMount && me.isFetching)) return <HomeLoading />;
-  if (me.isError) return <HomeError error={me.error} retry={me.refetch} />;
-  if (!me.data?.storeId) return <Navigate to="/onboarding" replace />;
-
-  return <StoreHome storeId={me.data.storeId} />;
-}
-
-function StoreHome({ storeId }: { storeId: string }) {
+  const storeId = useStoreId();
   const homeQuery = useHome(storeId);
+  const [isEventsOpen, setIsEventsOpen] = useState(false);
 
   if (homeQuery.isPending) return <HomeLoading />;
   if (homeQuery.isError) return <HomeError error={homeQuery.error} retry={homeQuery.refetch} />;
@@ -36,6 +31,7 @@ function StoreHome({ storeId }: { storeId: string }) {
   const home = homeQuery.data;
   const isTomorrow = home.view === "TOMORROW";
   const order = home.order ?? null;
+  const events = home.tiles.events ?? [];
   // TODO(api): order가 null이면 "거래처가 없음(영수증 건너뜀)"과 "오늘 주문할 곳이 없음"을 구분할 수 없다.
   //            지금은 둘 다 영수증 안내를 보여준다. 백엔드에 구분 값을 요청해야 한다.
   const needsReceipt = isTomorrow && (order === null || order.estimatedTotal === null);
@@ -62,7 +58,12 @@ function StoreHome({ storeId }: { storeId: string }) {
         </h1>
       )}
 
-      {home.tiles.weather && <WeatherRow view={home.view} weather={home.tiles.weather} />}
+      <WeatherRow
+        view={home.view}
+        weather={home.tiles.weather}
+        eventCount={events.length}
+        onEventsClick={() => setIsEventsOpen(true)}
+      />
 
       <HomeBanners
         // 날짜가 바뀌면 닫은 배너 기록을 새 날짜 것으로 다시 읽는다.
@@ -75,8 +76,19 @@ function StoreHome({ storeId }: { storeId: string }) {
       <ForecastCard storeId={storeId} home={home} />
 
       {needsReceipt && <ReceiptPromptCard />}
-      {isTomorrow && order && <OrderSummaryCard targetDate={home.targetDate} order={order} />}
+      {isTomorrow && order && (
+        <OrderSummaryCard storeId={storeId} targetDate={home.targetDate} order={order} />
+      )}
       {!isTomorrow && <NextOrderNotice targetDate={home.targetDate} />}
+
+      {isEventsOpen && (
+        <NearbyEventsSheet
+          view={home.view}
+          targetDate={home.targetDate}
+          events={events}
+          onClose={() => setIsEventsOpen(false)}
+        />
+      )}
     </HomeLayout>
   );
 }
@@ -107,7 +119,7 @@ function HomeError({ error, retry }: { error: Error; retry: () => void }) {
 function HomeLayout({ storeName, children }: { storeName?: string; children: ReactNode }) {
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-bg-page">
-      <StoreHeader storeName={storeName ?? ""} className="bg-bg-page" />
+      <StoreHeader storeName={storeName ?? ""} actions={<SettingsMenu />} className="bg-bg-page" />
       <main className="flex flex-1 flex-col gap-4 px-4 pb-6">{children}</main>
       <AppTabBar />
     </div>

@@ -24,6 +24,8 @@ export {
   CloudSun,
   Eye,
   EyeOff,
+  // 전역 File 타입과 이름이 겹쳐서 바꿔 내보낸다.
+  File as FileIcon,
   FilePen,
   House,
   Minus,
