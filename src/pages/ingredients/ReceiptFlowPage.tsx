@@ -8,8 +8,7 @@ import { ScheduleStep } from "./ScheduleStep";
 // TODO: A와 storeId 보관 방식을 정하면 교체한다. 지금은 openapi.yaml 예시값.
 const TEMP_STORE_ID = "st_8f2k1";
 
-// TODO: 3.2 재료 탭 라우트가 생기면 "/ingredients"로 바꾼다.
-const DEFAULT_RETURN_PATH = "/";
+const DEFAULT_RETURN_PATH = "/ingredients";
 
 type ReceiptFlowStep =
   { name: "capture" } | { name: "classify"; scanId: string } | { name: "schedule"; scanId: string };
