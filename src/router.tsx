@@ -1,8 +1,10 @@
 import { createBrowserRouter } from "react-router";
 
 import { HomePage } from "@/pages/home/HomePage";
+import { IngredientPriceFormPage } from "@/pages/ingredients/IngredientPriceFormPage";
 import { IngredientsPage } from "@/pages/ingredients/IngredientsPage";
 import { ReceiptFlowPage } from "@/pages/ingredients/ReceiptFlowPage";
+import { RecipeEditPage } from "@/pages/ingredients/RecipeEditPage";
 import { CoreIngredientsPage } from "@/pages/onboarding/CoreIngredientsPage";
 import { IngredientLoadingPage } from "@/pages/onboarding/IngredientLoadingPage";
 import { LoginPage } from "@/pages/onboarding/LoginPage";
@@ -26,6 +28,8 @@ export const router = createBrowserRouter([
   { path: "/signup", element: <SignUpPage /> },
   { path: "/home", element: <HomePage /> },
   { path: "/ingredients", element: <IngredientsPage /> },
+  { path: "/ingredients/recipes/:menuId", element: <RecipeEditPage /> },
+  { path: "/ingredients/:ingredientId/price", element: <IngredientPriceFormPage /> },
   { path: "/receipt", element: <ReceiptFlowPage /> },
   {
     path: "/onboarding",
