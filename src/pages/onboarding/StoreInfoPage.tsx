@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
 
 import { Chip } from "@/components/Chip";
-import { ChevronRight } from "@/components/icons";
+import { ChevronRight, TriangleAlert } from "@/components/icons";
 import { TextField } from "@/components/TextField";
 
 import { describeHours } from "./businessHours";
@@ -27,8 +27,11 @@ export function StoreInfoPage() {
   const [showAddress, setShowAddress] = useState(false);
   const [showHours, setShowHours] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const nameError = submitted && !draft.name.trim() ? "가게 이름을 입력해주세요." : undefined;
-  const addressError = submitted && !draft.roadAddress ? "가게 주소를 검색해주세요." : undefined;
+  const nameError = submitted && !draft.name.trim() ? "가게 이름을 입력해 주세요" : undefined;
+  const addressError =
+    submitted && !draft.roadAddress
+      ? "주소를 입력해 주세요. 동네 날씨를 가져올 때 써요"
+      : undefined;
 
   function selectAddress(postcode: string, roadAddress: string) {
     updateDraft({ postcode, roadAddress, detailAddress: "" });
@@ -77,8 +80,6 @@ export function StoreInfoPage() {
               placeholder="우편번호"
               value={draft.postcode}
               className="rounded-sm border-border-grey bg-bg-page"
-              aria-invalid={Boolean(addressError)}
-              aria-describedby={addressError ? "store-address-error" : undefined}
             />
             <OnboardingButton secondary onClick={() => setShowAddress(true)}>
               {draft.roadAddress ? "다시 검색" : "주소 검색"}
@@ -86,13 +87,20 @@ export function StoreInfoPage() {
           </div>
           <input
             aria-label="도로명 주소"
+            aria-invalid={Boolean(addressError)}
+            aria-describedby={addressError ? "store-address-error" : undefined}
             readOnly
             value={draft.roadAddress}
             placeholder="주소 검색을 눌러 가게 주소를 찾아주세요"
-            className="h-13 min-w-0 rounded-sm border border-border-grey bg-bg-page px-3.5 text-body-s placeholder:text-text-gray"
+            className="h-13 min-w-0 rounded-sm border border-border-grey bg-bg-page px-3.5 text-body-s placeholder:text-text-gray aria-invalid:border-form-danger aria-invalid:bg-form-danger-soft"
           />
           {addressError && (
-            <p id="store-address-error" role="alert" className="text-caption text-danger-default">
+            <p
+              id="store-address-error"
+              role="alert"
+              className="flex items-center gap-1 text-caption text-danger-default"
+            >
+              <TriangleAlert size={16} className="shrink-0" aria-hidden />
               {addressError}
             </p>
           )}

@@ -86,26 +86,33 @@ export function PostcodeSearch({ onClose, onSelect }: PostcodeSearchProps) {
           {results.length > 0 && (
             <ul className="mt-1 divide-y divide-border-divider">
               {results.map(({ postcode, road, lot }) => (
-                <li key={postcode}>
-                  <button
-                    type="button"
-                    onClick={() => onSelect(postcode, road)}
-                    className="grid w-full gap-1 rounded-sm px-2 py-4 text-left outline-none hover:bg-bg-hover focus-visible:ring-2 focus-visible:ring-button-primary"
-                  >
+                <li
+                  key={postcode}
+                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-2 py-4"
+                >
+                  <div className="grid gap-1">
                     <span className="text-caption">{postcode}</span>
                     <span className="flex items-start gap-2 text-body-m">
                       <span className="shrink-0 rounded-sm bg-button-primary px-1.5 text-caption text-text-white">
                         도로명
                       </span>
-                      {road}
+                      <span className="break-keep">{road}</span>
                     </span>
                     <span className="flex items-start gap-2 text-body-s text-text-gray-darker">
                       <span className="shrink-0 rounded-sm bg-button-subtle px-1.5 text-caption text-text-black">
                         지번
                       </span>
-                      {lot}
+                      <span className="break-keep">{lot}</span>
                     </span>
-                  </button>
+                  </div>
+                  <OnboardingButton
+                    secondary
+                    aria-label={`선택: ${road}`}
+                    className="h-11! px-3 text-label-s-b whitespace-nowrap"
+                    onClick={() => onSelect(postcode, road)}
+                  >
+                    선택
+                  </OnboardingButton>
                 </li>
               ))}
             </ul>
