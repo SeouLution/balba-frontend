@@ -1,11 +1,12 @@
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 
 import type { ReceiptQuestionAnswer, ReceiptScan, ReceiptSupplierGroup } from "@/api/receiptScans";
 import { Button } from "@/components";
 import { Badge } from "@/components/Badge";
+import { Loading } from "@/components/Loading";
 import { useConfirmReceiptScan, useReceiptScan } from "@/hooks/useReceiptScan";
 
-import { ReceiptHeader } from "./ReceiptHeader";
+import { ReceiptStepLayout } from "./ReceiptStepLayout";
 
 type ClassifyStepProps = {
   storeId: string;
@@ -27,38 +28,40 @@ export function ClassifyStep({ storeId, scanId, onBack, onConfirmed }: ClassifyS
 
   if (isReading) {
     return (
-      <StepLayout title="영수증 읽는 중" onBack={onBack}>
-        <p className="py-20 text-center text-body-m text-text-gray-darker">
-          영수증을 읽고 있어요. 잠시만 기다려 주세요.
-        </p>
-      </StepLayout>
+      <ReceiptStepLayout title="영수증 읽는 중" onBack={onBack}>
+        <Loading>
+          영수증을 읽고 있어요.
+          <br />
+          잠시만 기다려 주세요.
+        </Loading>
+      </ReceiptStepLayout>
     );
   }
 
   if (scanQuery.isError || !scan) {
     return (
-      <StepLayout title="영수증 분류" onBack={onBack}>
+      <ReceiptStepLayout title="영수증 분류" onBack={onBack}>
         <div className="flex flex-col items-center gap-4 py-20">
           <p className="text-body-m text-text-gray-darker">영수증 결과를 불러오지 못했어요.</p>
           <Button variant="secondary" onClick={() => scanQuery.refetch()}>
             다시 불러오기
           </Button>
         </div>
-      </StepLayout>
+      </ReceiptStepLayout>
     );
   }
 
   const groups = scan.groups ?? [];
   if (groups.length === 0) {
     return (
-      <StepLayout title="영수증 분류" onBack={onBack}>
+      <ReceiptStepLayout title="영수증 분류" onBack={onBack}>
         <div className="flex flex-col items-center gap-4 py-20">
           <p className="text-body-m text-text-gray-darker">읽을 수 있는 영수증이 없었어요.</p>
           <Button variant="secondary" onClick={onBack}>
             다시 찍기
           </Button>
         </div>
-      </StepLayout>
+      </ReceiptStepLayout>
     );
   }
 
@@ -80,7 +83,7 @@ export function ClassifyStep({ storeId, scanId, onBack, onConfirmed }: ClassifyS
   }
 
   return (
-    <StepLayout
+    <ReceiptStepLayout
       title={`영수증 ${summary.receiptCount}장 촬영`}
       onBack={onBack}
       footer={
@@ -148,7 +151,7 @@ export function ClassifyStep({ storeId, scanId, onBack, onConfirmed }: ClassifyS
           {text}
         </p>
       ))}
-    </StepLayout>
+    </ReceiptStepLayout>
   );
 }
 
@@ -176,28 +179,6 @@ function SupplierGroupCard({ group }: { group: ReceiptSupplierGroup }) {
         </p>
       )}
     </li>
-  );
-}
-
-function StepLayout({
-  title,
-  onBack,
-  footer,
-  children,
-}: {
-  title: string;
-  onBack: () => void;
-  footer?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-button-surface-1">
-      <ReceiptHeader title={title} onBack={onBack} />
-      <main className="flex flex-1 flex-col gap-4 px-5 pb-6">{children}</main>
-      {footer && (
-        <footer className="sticky bottom-0 bg-button-surface-1 px-5 pt-2 pb-6">{footer}</footer>
-      )}
-    </div>
   );
 }
 
