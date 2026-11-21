@@ -30,9 +30,9 @@ export type EventSummary = {
 };
 
 // FIRST_FORECAST 첫 예측 준비됨(X로 닫은 것은 프론트가 기억) · OVERNIGHT_CHANGE 밤사이 변경
-// EVENT_TODAY 오늘 행사 · DELIVERY_EXPECTED 어젯밤 발주 입고 예정
+// EVENT_TODAY 오늘 행사 · DELIVERY_EXPECTED 어젯밤 발주 입고 예정 · LOW_STOCK 재고 부족
 export type HomeBannerType =
-  "FIRST_FORECAST" | "OVERNIGHT_CHANGE" | "EVENT_TODAY" | "DELIVERY_EXPECTED";
+  "FIRST_FORECAST" | "OVERNIGHT_CHANGE" | "EVENT_TODAY" | "DELIVERY_EXPECTED" | "LOW_STOCK";
 
 export type HomeBanner = {
   type: HomeBannerType;
