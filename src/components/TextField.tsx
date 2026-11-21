@@ -19,6 +19,7 @@ export function TextField({
 }: TextFieldProps) {
   const generatedId = useId();
   const fieldId = id ?? generatedId;
+  const showInvalidStyle = Boolean(error || (invalid && invalid !== "false"));
 
   return (
     <Field id={fieldId} label={label} required={required} error={error}>
@@ -32,8 +33,9 @@ export function TextField({
         }
         className={cn(
           "h-form-field w-full min-w-0 rounded-form border border-form-border bg-form-surface px-4 text-base text-form-ink placeholder:text-form-muted focus-visible:ring-3 focus-visible:ring-form-navy/30 focus-visible:outline-none disabled:bg-form-disabled disabled:text-form-muted",
-          error && "border-form-danger bg-form-danger-soft focus-visible:ring-form-danger/30",
           className,
+          showInvalidStyle &&
+            "border-form-danger bg-form-danger-soft focus-visible:ring-form-danger/30",
         )}
       />
     </Field>

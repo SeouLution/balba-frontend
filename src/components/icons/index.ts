@@ -21,6 +21,7 @@ export {
   CloudRain,
   House,
   Minus,
+  Pen,
   Plus,
   Search,
   Settings,

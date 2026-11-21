@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { TriangleAlert } from "@/components/icons";
 import { cn } from "@/utils/cn";
 
 type FieldProps = {
@@ -26,18 +27,7 @@ export function Field({ id, label, required, error, children }: FieldProps) {
       {children}
       {error && (
         <p id={id + "-error"} className="flex items-center gap-1 text-sm text-form-danger">
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="size-4 shrink-0"
-          >
-            <path d="M12 3 2 21h20L12 3Z M12 9v4 M12 17h.01" />
-          </svg>
+          <TriangleAlert size={16} className="shrink-0" aria-hidden />
           {error}
         </p>
       )}
