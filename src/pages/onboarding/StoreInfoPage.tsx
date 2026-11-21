@@ -6,6 +6,7 @@ import type { StoreCategory } from "@/api/stores";
 import { Button } from "@/components/Button";
 import { Chip } from "@/components/Chip";
 import { ChevronRight } from "@/components/icons";
+import { LoadingSpinner } from "@/components/Loading";
 import { TextField } from "@/components/TextField";
 import { useCreateStore } from "@/hooks/useCreateStore";
 
@@ -85,9 +86,17 @@ export function StoreInfoPage() {
       step={1}
       onBack={createStore.isPending ? undefined : () => navigate("/onboarding")}
       footer={
-        <OnboardingButton form="store-info" type="submit" disabled={createStore.isPending}>
-          {createStore.isPending ? "가게 정보 저장 중…" : "다음"}
-        </OnboardingButton>
+        <>
+          <OnboardingButton form="store-info" type="submit" disabled={createStore.isPending}>
+            {createStore.isPending && (
+              <LoadingSpinner className="size-4 shrink-0 border-2 motion-reduce:animate-none" />
+            )}
+            {createStore.isPending ? "가게 정보 저장 중…" : "다음"}
+          </OnboardingButton>
+          <span role="status" className="sr-only">
+            {createStore.isPending && "가게 정보 저장 중…"}
+          </span>
+        </>
       }
     >
       <OnboardingHeading title="가게를 알려주세요">

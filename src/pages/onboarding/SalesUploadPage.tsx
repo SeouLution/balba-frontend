@@ -16,13 +16,12 @@ import {
   OnboardingButton,
   OnboardingError,
   OnboardingHeading,
-  OnboardingLink,
   OnboardingScreen,
 } from "./OnboardingScreen";
 
 export function SalesUploadPage() {
   const navigate = useNavigate();
-  const { store, salesUpload, setSalesUpload, salesConfirmed } = useOnboarding();
+  const { store, salesUpload, setSalesUpload } = useOnboarding();
   const upload = useCreateSalesImport(store?.id ?? "");
   const input = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File>();
@@ -75,19 +74,9 @@ export function SalesUploadPage() {
       step={2}
       onBack={upload.isPending ? undefined : () => navigate("../store")}
       footer={
-        <>
-          <OnboardingButton
-            disabled={!fileName || !!fileError || upload.isPending}
-            onClick={submit}
-          >
-            {upload.isPending ? "파일 올리는 중…" : "다음"}
-          </OnboardingButton>
-          {!upload.isPending && !salesConfirmed && (
-            <OnboardingLink to="../complete" onClick={() => setSalesUpload(null)}>
-              엑셀이 없어요 · 나중에 올리기
-            </OnboardingLink>
-          )}
-        </>
+        <OnboardingButton disabled={!fileName || !!fileError || upload.isPending} onClick={submit}>
+          {upload.isPending ? "파일 올리는 중…" : "다음"}
+        </OnboardingButton>
       }
     >
       <OnboardingHeading
