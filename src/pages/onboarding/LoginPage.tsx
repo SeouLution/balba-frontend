@@ -82,15 +82,25 @@ export function LoginPage() {
             }}
             className="rounded-sm border-border-grey text-label-l"
           />
-          <PasswordField
-            name="password"
-            label="비밀번호"
-            autoComplete="current-password"
-            placeholder="비밀번호를 입력해 주세요."
-            readOnly={login.isPending}
-            onChange={() => login.reset()}
-            className="rounded-sm border-border-grey text-label-l"
-          />
+          {/* 서버 에러는 휴대폰 번호 형식 에러처럼 입력칸 바로 아래에 붙인다. */}
+          <div className="grid gap-2">
+            <PasswordField
+              name="password"
+              label="비밀번호"
+              autoComplete="current-password"
+              placeholder="비밀번호를 입력해 주세요."
+              readOnly={login.isPending}
+              onChange={() => login.reset()}
+              className="rounded-sm border-border-grey text-label-l"
+            />
+            {login.isError && (
+              <OnboardingError>
+                {login.error instanceof ApiError && login.error.code === "UNAUTHORIZED"
+                  ? "휴대폰 번호 또는 비밀번호가 올바르지 않아요."
+                  : "로그인하지 못했어요. 잠시 후 다시 시도해 주세요."}
+              </OnboardingError>
+            )}
+          </div>
         </div>
         <div className="mt-2 flex justify-end">
           <OnboardingLink
@@ -100,13 +110,6 @@ export function LoginPage() {
             회원가입하기
           </OnboardingLink>
         </div>
-        {login.isError && (
-          <OnboardingError>
-            {login.error instanceof ApiError && login.error.code === "UNAUTHORIZED"
-              ? "휴대폰 번호 또는 비밀번호가 올바르지 않아요."
-              : "로그인하지 못했어요. 잠시 후 다시 시도해 주세요."}
-          </OnboardingError>
-        )}
       </form>
     </OnboardingScreen>
   );

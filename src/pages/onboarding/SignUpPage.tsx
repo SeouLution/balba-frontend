@@ -83,16 +83,17 @@ export function SignUpPage() {
           }}
           className="rounded-sm border-border-grey text-label-l"
         />
-        <PasswordField
-          name="password"
-          label="비밀번호"
-          autoComplete="new-password"
-          placeholder="비밀번호를 입력해 주세요."
-          readOnly={signup.isPending}
-          onChange={() => signup.reset()}
-          className="rounded-sm border-border-grey text-label-l"
-        />
-        <div>
+        {/* 서버 에러는 휴대폰 번호 형식 에러처럼 입력칸 바로 아래에 붙인다. */}
+        <div className="grid gap-2">
+          <PasswordField
+            name="password"
+            label="비밀번호"
+            autoComplete="new-password"
+            placeholder="비밀번호를 입력해 주세요."
+            readOnly={signup.isPending}
+            onChange={() => signup.reset()}
+            className="rounded-sm border-border-grey text-label-l"
+          />
           {signup.isError && (
             <OnboardingError>
               {signup.error instanceof ApiError && signup.error.code === "CONFLICT"
@@ -100,6 +101,8 @@ export function SignUpPage() {
                 : "가입하지 못했어요. 잠시 후 다시 시도해 주세요."}
             </OnboardingError>
           )}
+        </div>
+        <div>
           <OnboardingLink to="/" className="inline-block text-caption text-button-primary">
             로그인으로 돌아가기
           </OnboardingLink>
