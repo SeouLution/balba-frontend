@@ -6,6 +6,8 @@
  * 새 lucide 아이콘이 필요하면 여기에 한 줄 추가하면 돼요.
  */
 export {
+  ArrowDown,
+  ArrowUp,
   ArrowUpFromLine,
   Box,
   Camera,
