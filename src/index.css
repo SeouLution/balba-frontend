@@ -7,6 +7,14 @@ body {
   @apply bg-bg-page font-sans text-text-black;
 }
 
+@layer base {
+  @media (any-hover: hover) and (any-pointer: fine) {
+    :where(button:enabled, select:enabled, a[href], input[type="checkbox"]:enabled) {
+      cursor: pointer;
+    }
+  }
+}
+
 @theme {
   --color-form-navy: #192b49;
   --color-form-navy-hover: #2b4368;
