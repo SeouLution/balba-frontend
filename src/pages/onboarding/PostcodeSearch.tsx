@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 
 import { Button } from "@/components/Button";
+import { LoadingSpinner } from "@/components/Loading";
 import { TextField } from "@/components/TextField";
 import { usePostcodeSearch } from "@/hooks/usePostcodeSearch";
 
@@ -71,7 +72,8 @@ function PostcodeSearchFrame({ onSelect }: Pick<PostcodeSearchProps, "onSelect">
   return (
     <>
       {status === "loading" && (
-        <p role="status" className="text-body-s">
+        <p role="status" className="flex items-center gap-2 text-body-s">
+          <LoadingSpinner className="size-4 shrink-0 border-2 motion-reduce:animate-none" />
           주소 검색을 불러오는 중이에요.
         </p>
       )}
