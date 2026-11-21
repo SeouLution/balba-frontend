@@ -86,18 +86,19 @@ function PriceForm({ storeId, title, ingredient, onDone }: PriceFormProps) {
   // 서버는 미래 입고일을 받지 않는다.
   const isFutureDate =
     purchasedOn > toIsoDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
-  const canSave = Number(quantity) > 0 && !isFutureDate && !createPurchase.isPending;
+  const canSave =
+    amount !== "" && Number(quantity) > 0 && !isFutureDate && !createPurchase.isPending;
 
   function handleSave() {
-    // TODO(api): 수기 입고는 수량 · 날짜만 받는다. 산 금액(단가)을 저장하는 API가 생기면 amount를 보낸다.
+    // 백엔드는 단가를 소수점 이하 6자리까지만 받는다.
+    const unitPrice = Math.round((Number(amount) / Number(quantity)) * 1_000_000) / 1_000_000;
     createPurchase.mutate(
-      { ingredientId: ingredient.id, purchasedOn, quantity: Number(quantity) },
+      { ingredientId: ingredient.id, purchasedOn, quantity: Number(quantity), unitPrice },
       {
         onSuccess: () => {
           showToast("입고 정보를 저장했어요");
           onDone();
         },
-        onError: () => showToast("저장하지 못했어요. 다시 눌러 주세요."),
       },
     );
   }
@@ -107,9 +108,16 @@ function PriceForm({ storeId, title, ingredient, onDone }: PriceFormProps) {
       title={title}
       onBack={onDone}
       footer={
-        <Button disabled={!canSave} onClick={handleSave} className="w-full">
-          {createPurchase.isPending ? "저장하는 중…" : "저장"}
-        </Button>
+        <>
+          {createPurchase.isError && (
+            <p role="alert" className="mb-2 text-center text-caption text-danger-subtle-text">
+              저장하지 못했어요. 다시 눌러 주세요.
+            </p>
+          )}
+          <Button disabled={!canSave} onClick={handleSave} className="w-full">
+            {createPurchase.isPending ? "저장하는 중이에요" : "저장"}
+          </Button>
+        </>
       }
     >
       {/* 재료 이름을 바꾸는 API가 없어 고를 재료를 보여주기만 한다. */}
