@@ -29,10 +29,13 @@ export {
   File as FileIcon,
   FilePen,
   House,
+  // 전역 Image 타입과 이름이 겹쳐서 바꿔 내보낸다.
+  Image as ImageIcon,
   Minus,
   Pen,
   PenLine,
   Plus,
+  ReceiptText,
   Search,
   Settings,
   StickyNote,

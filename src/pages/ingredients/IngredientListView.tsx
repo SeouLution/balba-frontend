@@ -7,8 +7,8 @@ import { Check, FilePen } from "@/components/icons";
 import { Loading } from "@/components/Loading";
 import { useIngredients } from "@/hooks/useIngredients";
 
-import { IngredientInfoSheet } from "./IngredientInfoSheet";
 import { byKoreanName, formatUnitPrice } from "./ingredientFormat";
+import { PriceInputSheet } from "./PriceInputSheet";
 
 type IngredientListViewProps = {
   storeId: string;
@@ -68,8 +68,10 @@ export function IngredientListView({
       )}
 
       <div className="flex items-center justify-between">
-        <span className="text-label-s-b text-text-black">재료 {ingredients.length}개</span>
-        <span className="text-caption text-text-gray">가나다 순</span>
+        <span className="text-label-l font-semibold text-text-black">
+          재료 {ingredients.length}개
+        </span>
+        <span className="text-body-s text-text-gray">가나다 순</span>
       </div>
 
       {ingredients.length === 0 ? (
@@ -89,18 +91,18 @@ export function IngredientListView({
       )}
 
       {sheetIngredient && (
-        <IngredientInfoSheet
-          ingredient={sheetIngredient}
+        <PriceInputSheet
+          storeId={storeId}
           onClose={() => setSheetIngredient(null)}
           onDirectInput={() => navigate(`/ingredients/${sheetIngredient.id}/price`)}
-          onTakeReceipt={() => navigate("/receipt?returnTo=/ingredients")}
         />
       )}
     </>
   );
 }
 
-// TODO(api): 디자인의 주문 날짜는 재료 응답에 없어서 뺐다.
+// TODO(api): 디자인의 산 금액(20,000원) · 수량(100kg) · 입고 날짜는 재료 응답에 없어서
+//            1개(1g)당 단가와 단위만 보여준다.
 function IngredientRow({
   ingredient,
   onOpenSheet,
@@ -116,18 +118,18 @@ function IngredientRow({
       <button
         type="button"
         onClick={() => navigate(`/ingredients/${ingredient.id}/price?mode=edit`)}
-        className="min-w-0 flex-1 py-3.5 text-left outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20"
+        className="min-w-0 flex-1 py-4 pl-2 text-left outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20"
       >
-        <p className="text-label-l text-text-black">{ingredient.name}</p>
-        <p className="mt-0.5 flex items-center gap-2 text-caption text-text-gray-darker">
+        <p className="text-label-l font-semibold text-button-primary">{ingredient.name}</p>
+        <p className="mt-1 flex items-center gap-3 text-body-s text-text-gray-darker">
           <span>{unitPrice ?? "가격 정보 없음"}</span>
-          <span aria-hidden className="h-3 w-px bg-border-grey" />
+          <span aria-hidden className="h-4 w-px bg-border-grey" />
           <span>단위 {ingredient.unit}</span>
         </p>
       </button>
       <button
         type="button"
-        aria-label={`${ingredient.name} 정보 입력`}
+        aria-label={`${ingredient.name} 단가 정보 입력`}
         onClick={onOpenSheet}
         className="flex size-11 shrink-0 items-center justify-center rounded-sm text-border-primary outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20"
       >

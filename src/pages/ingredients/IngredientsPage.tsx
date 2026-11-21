@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 
 import { AppTabBar } from "@/components/AppTabBar";
@@ -7,6 +8,7 @@ import { cn } from "@/utils/cn";
 
 import { IngredientListView } from "./IngredientListView";
 import { MenuRecipeListView } from "./MenuRecipeListView";
+import { PriceInputSheet } from "./PriceInputSheet";
 import type { ReceiptFlowResult } from "./ReceiptFlowPage";
 
 type IngredientsTab = "menus" | "ingredients";
@@ -20,11 +22,21 @@ export function IngredientsPage() {
   // 수정 화면에서 돌아와도 보던 탭이 유지되도록 주소에 둔다. 기본은 재료별.
   const tab: IngredientsTab = searchParams.get("tab") === "menus" ? "menus" : "ingredients";
   const receiptResult = location.state as ReceiptFlowResult | null;
+  const [isBulkSheetOpen, setIsBulkSheetOpen] = useState(false);
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-button-surface-1">
       <header className="flex h-16 items-center justify-between px-5">
-        <h1 className="text-label-l text-text-black">재료</h1>
+        <h1 className="text-label-l font-semibold text-button-primary">재료</h1>
+        {tab === "ingredients" && (
+          <button
+            type="button"
+            onClick={() => setIsBulkSheetOpen(true)}
+            className="inline-flex h-12 items-center rounded-sm border border-border-grey bg-button-surface-1 px-4 text-label-l text-text-black outline-none hover:bg-bg-hover focus-visible:ring-4 focus-visible:ring-button-primary/20 active:bg-button-subtle"
+          >
+            단가 일괄 불러오기
+          </button>
+        )}
         {tab === "menus" && (
           <button
             type="button"
@@ -65,6 +77,13 @@ export function IngredientsPage() {
         )}
       </main>
 
+      {isBulkSheetOpen && (
+        <PriceInputSheet
+          storeId={storeId}
+          initialStep="upload"
+          onClose={() => setIsBulkSheetOpen(false)}
+        />
+      )}
       <AppTabBar />
     </div>
   );
@@ -86,7 +105,7 @@ function TabButton({
       aria-selected={selected}
       onClick={onClick}
       className={cn(
-        "h-11 rounded-pill text-label-s-b outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20",
+        "h-13 rounded-pill text-label-l font-semibold outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20",
         selected ? "bg-button-primary text-text-white" : "text-text-gray",
       )}
     >

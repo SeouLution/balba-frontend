@@ -16,6 +16,19 @@ type ReceiptFlowPageProps = {
   onSaved?: (photoCount: number) => void;
 };
 
+/** 앨범에서 고른 사진을 이미 올렸을 때 넘기는 값. 촬영을 건너뛰고 확인 단계부터 연다. */
+export type ReceiptFlowEntryState = {
+  scanId: string;
+  photoCount: number;
+};
+
+function readEntryState(state: unknown): ReceiptFlowEntryState | null {
+  if (state && typeof state === "object" && "scanId" in state && "photoCount" in state) {
+    return state as ReceiptFlowEntryState;
+  }
+  return null;
+}
+
 /** 돌아간 화면이 읽는 값. 재료 탭은 이걸로 "정보가 입력됐어요" 카드를 띄운다. */
 export type ReceiptFlowResult = {
   receiptIngredientNames: string[];
@@ -29,7 +42,10 @@ export function ReceiptFlowPage({ storeId: entryStoreId, onBack, onSaved }: Rece
   // 온보딩은 storeId를 직접 넘기고, 재료 탭은 RequireStore가 준 값을 쓴다.
   const currentStoreId = useOptionalStoreId();
   const storeId = entryStoreId ?? currentStoreId;
-  const [step, setStep] = useState<ReceiptFlowStep>({ name: "capture" });
+  const entryState = readEntryState(location.state);
+  const [step, setStep] = useState<ReceiptFlowStep>(() =>
+    entryState ? { name: "review", ...entryState } : { name: "capture" },
+  );
   if (!storeId) throw new Error("ReceiptFlowPage에는 가게 id가 필요해요.");
 
   function finishFlow(ingredientNames: string[]) {
@@ -62,7 +78,8 @@ export function ReceiptFlowPage({ storeId: entryStoreId, onBack, onSaved }: Rece
     <ReceiptReviewStep
       storeId={storeId}
       scanId={step.scanId}
-      onBack={() => setStep({ name: "capture" })}
+      // 앨범에서 들어왔으면 촬영 화면이 아니라 원래 화면으로 돌아간다.
+      onBack={entryState ? leaveFlow : () => setStep({ name: "capture" })}
       onConfirmed={onSaved ? () => onSaved(step.photoCount) : finishFlow}
     />
   );
