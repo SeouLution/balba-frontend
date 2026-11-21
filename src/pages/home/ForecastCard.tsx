@@ -1,9 +1,8 @@
 import { useState } from "react";
 
 import type { ForecastItem, Home } from "@/api/home";
-import { Stepper, Toggle } from "@/components";
 import { Badge } from "@/components/Badge";
-import { ArrowDown, ArrowUp, ChevronDown } from "@/components/icons";
+import { ArrowDown, ArrowUp } from "@/components/icons";
 import { useAdjustForecast } from "@/hooks/useHome";
 import { cn } from "@/utils/cn";
 
@@ -14,7 +13,7 @@ type ForecastCardProps = {
   home: Home;
 };
 
-/** 2.0-1 오늘 미리 준비해둘 양(± 수정) · 2.2 어젯밤 정한 오늘 준비량(보기만) */
+/** 2.0-1 오늘 미리 준비해둘 양(숫자 입력으로 수정) · 2.2 어젯밤 정한 오늘 준비량(보기만) */
 export function ForecastCard({ storeId, home }: ForecastCardProps) {
   const isTomorrow = home.view === "TOMORROW";
   const { items, totalMenuCount } = home.forecast;
@@ -59,75 +58,82 @@ export function ForecastCard({ storeId, home }: ForecastCardProps) {
 
 function EditableForecastList({ storeId, home }: ForecastCardProps) {
   const adjustForecast = useAdjustForecast(storeId, home.targetDate);
-  // 처음에는 첫 메뉴를 펼쳐 둔다. null이면 모두 접힌 상태.
-  const [expandedMenuId, setExpandedMenuId] = useState<string | null | undefined>(undefined);
-  const openMenuId =
-    expandedMenuId === undefined ? home.forecast.items[0]?.menu.id : expandedMenuId;
 
   return (
     <ul className="mt-4 divide-y divide-border-divider border-t border-border-divider">
       {home.forecast.items.map((item) => {
-        const isOpen = item.menu.id === openMenuId;
-        const panelId = `forecast-panel-${item.menu.id}`;
+        const hint = describeForecastChange(item, home.view);
 
         return (
-          <li key={item.menu.id} className="py-4">
-            <button
-              type="button"
-              aria-expanded={isOpen}
-              aria-controls={panelId}
-              onClick={() => setExpandedMenuId(isOpen ? null : item.menu.id)}
-              className="flex w-full items-center gap-3 text-left outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20"
-            >
-              <ForecastSummary item={item} view={home.view} />
-              <ChevronDown
-                size={20}
-                aria-hidden
-                className={cn(
-                  "shrink-0 text-border-primary transition-transform",
-                  isOpen && "rotate-180",
-                )}
-              />
-            </button>
-
-            {isOpen && (
-              <div id={panelId} className="mt-3 flex flex-col gap-3">
-                {item.summaryText && <ReasonBox>{item.summaryText}</ReasonBox>}
-                <div className="flex items-center justify-between gap-3">
-                  <Stepper
-                    label={`${item.menu.name} 준비량`}
-                    value={item.planned}
-                    unit={item.unit}
-                    disabled={isResting(item)}
-                    onChange={(quantity) =>
-                      adjustForecast.mutate({ menuId: item.menu.id, quantity })
-                    }
-                  />
-                  {/* 쉬는 메뉴는 준비량 0으로 저장한다. 다시 켜면 AI 추천량으로 돌린다. */}
-                  <Toggle
-                    aria-label={`${item.menu.name} 만들기`}
-                    checked={!isResting(item)}
-                    onChange={(event) =>
-                      adjustForecast.mutate({
-                        menuId: item.menu.id,
-                        quantity: event.target.checked ? item.recommended : 0,
-                      })
-                    }
-                    onLabel="만들어요"
-                    offLabel="쉬어요"
-                  />
-                </div>
+          <li key={item.menu.id} className="flex items-center gap-3 py-4">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <p
+                  className={cn("text-label-l text-text-black", isResting(item) && "line-through")}
+                >
+                  {item.menu.name}
+                </p>
+                {hint && <Badge type={hint.direction ?? "soft"}>{hint.text}</Badge>}
               </div>
-            )}
+              {item.summaryText && (
+                <p className="mt-1 text-body-s text-text-gray-darker">{item.summaryText}</p>
+              )}
+            </div>
+            <QuantityInput
+              // 서버 값이 바뀌면(저장 성공 · 실패 되돌림) 입력칸을 새 값으로 다시 그린다.
+              key={`${item.menu.id}-${item.planned}`}
+              item={item}
+              onCommit={(quantity) => adjustForecast.mutate({ menuId: item.menu.id, quantity })}
+            />
           </li>
         );
       })}
       {adjustForecast.isError && (
         <li className="pt-3 text-caption text-danger-subtle-text">
-          준비량을 저장하지 못했어요. 다시 눌러 주세요.
+          준비량을 저장하지 못했어요. 다시 입력해 주세요.
         </li>
       )}
     </ul>
+  );
+}
+
+type QuantityInputProps = {
+  item: ForecastItem;
+  onCommit: (quantity: number) => void;
+};
+
+/**
+ * 준비량 입력칸. 칠 때마다 저장하지 않고, 칸을 벗어나거나 Enter를 누르면 한 번 저장한다.
+ * 0을 넣으면 그날 쉬는 메뉴가 된다.
+ */
+function QuantityInput({ item, onCommit }: QuantityInputProps) {
+  const [draft, setDraft] = useState(String(item.planned));
+
+  function commit() {
+    if (draft === "") {
+      setDraft(String(item.planned));
+      return;
+    }
+    const quantity = Number(draft);
+    if (quantity !== item.planned) onCommit(quantity);
+  }
+
+  return (
+    <label className="flex shrink-0 items-center gap-2">
+      <input
+        type="text"
+        inputMode="numeric"
+        aria-label={`${item.menu.name} 준비량`}
+        value={draft}
+        onChange={(event) => setDraft(event.target.value.replace(/[^0-9]/g, ""))}
+        onBlur={commit}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") event.currentTarget.blur();
+        }}
+        className="h-12 w-16 rounded-sm border border-border-grey bg-button-surface-1 px-3 text-label-l text-text-black tabular-nums outline-none focus:border-border-primary focus-visible:ring-4 focus-visible:ring-button-primary/20"
+      />
+      <span className="text-label-l text-text-black">{item.unit}</span>
+    </label>
   );
 }
 
