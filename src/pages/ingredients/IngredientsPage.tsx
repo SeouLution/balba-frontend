@@ -8,9 +8,7 @@ import { ChartColumn, ChevronRight, House, Box, Tag } from "@/components/icons";
 import { Loading } from "@/components/Loading";
 import { TabBar, type TabBarItem } from "@/components/TabBar";
 import { useIngredients } from "@/hooks/useIngredients";
-
-// TODO: A와 storeId 보관 방식을 정하면 교체한다. 지금은 openapi.yaml 예시값.
-const TEMP_STORE_ID = "st_8f2k1";
+import { useStoreId } from "@/hooks/useStoreId";
 
 // TODO: 홈 · 할인 · 리포트 라우트가 생기면 경로를 맞춘다.
 const TAB_BAR_ITEMS: TabBarItem[] = [
@@ -23,7 +21,8 @@ const TAB_BAR_ITEMS: TabBarItem[] = [
 /** 3.2 재료 탭 */
 export function IngredientsPage() {
   const navigate = useNavigate();
-  const ingredientsQuery = useIngredients(TEMP_STORE_ID);
+  const storeId = useStoreId();
+  const ingredientsQuery = useIngredients(storeId);
   const [selectedStatus, setSelectedStatus] = useState<IngredientStatus>("CORE");
 
   return (

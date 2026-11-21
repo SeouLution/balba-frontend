@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 
+import { useStoreId } from "@/hooks/useStoreId";
+
 import { CaptureStep } from "./CaptureStep";
 import { ClassifyStep } from "./ClassifyStep";
 import { ScheduleStep } from "./ScheduleStep";
-
-// TODO: A와 storeId 보관 방식을 정하면 교체한다. 지금은 openapi.yaml 예시값.
-const TEMP_STORE_ID = "st_8f2k1";
 
 const DEFAULT_RETURN_PATH = "/ingredients";
 
@@ -17,6 +16,7 @@ type ReceiptFlowStep =
 export function ReceiptFlowPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const storeId = useStoreId();
   const [step, setStep] = useState<ReceiptFlowStep>({ name: "capture" });
 
   function finishFlow() {
@@ -27,7 +27,7 @@ export function ReceiptFlowPage() {
   if (step.name === "capture") {
     return (
       <CaptureStep
-        storeId={TEMP_STORE_ID}
+        storeId={storeId}
         onBack={() => navigate(-1)}
         onUploaded={(scanId) => setStep({ name: "classify", scanId })}
       />
@@ -37,7 +37,7 @@ export function ReceiptFlowPage() {
   if (step.name === "classify") {
     return (
       <ClassifyStep
-        storeId={TEMP_STORE_ID}
+        storeId={storeId}
         scanId={step.scanId}
         onBack={() => setStep({ name: "capture" })}
         onConfirmed={() => setStep({ name: "schedule", scanId: step.scanId })}
@@ -47,7 +47,7 @@ export function ReceiptFlowPage() {
 
   return (
     <ScheduleStep
-      storeId={TEMP_STORE_ID}
+      storeId={storeId}
       onBack={() => setStep({ name: "classify", scanId: step.scanId })}
       onSaved={finishFlow}
     />
