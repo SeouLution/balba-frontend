@@ -3,6 +3,7 @@ import { Navigate, Outlet, useLocation } from "react-router";
 
 import { initialStoreDraft, useOnboarding, type OnboardingContext } from "./onboardingContext";
 import type { ColumnMapping, RecipeUnit } from "./onboardingTypes";
+import { withoutMenuOverrides } from "./recipeIngredients";
 import { exampleDetection } from "./salesColumns";
 
 export function OnboardingLayout() {
@@ -19,6 +20,9 @@ export function OnboardingLayout() {
   const [receiptPhotoCount, setReceiptPhotoCount] = useState(0);
   const [recipeAmounts, setRecipeAmounts] = useState<Record<string, number>>({});
   const [recipeUnits, setRecipeUnits] = useState<OnboardingContext["recipeUnits"]>({});
+  const [editedMenuIngredients, setEditedMenuIngredients] = useState<
+    OnboardingContext["editedMenuIngredients"]
+  >({});
 
   const context: OnboardingContext = {
     draft,
@@ -32,6 +36,7 @@ export function OnboardingLayout() {
       setReceiptPhotoCount(0);
       setRecipeAmounts({});
       setRecipeUnits({});
+      setEditedMenuIngredients({});
     },
     mapping,
     setMapping,
@@ -47,6 +52,12 @@ export function OnboardingLayout() {
     recipeUnits,
     updateRecipeUnit: (key, unit: RecipeUnit) =>
       setRecipeUnits((current) => ({ ...current, [key]: unit })),
+    editedMenuIngredients,
+    saveMenuIngredients: (menuName, ingredients) => {
+      setEditedMenuIngredients((current) => ({ ...current, [menuName]: ingredients }));
+      setRecipeAmounts((current) => withoutMenuOverrides(current, menuName));
+      setRecipeUnits((current) => withoutMenuOverrides(current, menuName));
+    },
   };
 
   return <Outlet context={context} />;
