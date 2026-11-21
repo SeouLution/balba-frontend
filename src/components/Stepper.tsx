@@ -11,6 +11,8 @@ export type StepperProps = {
   unit?: string;
   disabled?: boolean;
   className?: string;
+  buttonClassName?: string;
+  valueClassName?: string;
 };
 
 export function Stepper({
@@ -23,6 +25,8 @@ export function Stepper({
   unit,
   disabled,
   className,
+  buttonClassName,
+  valueClassName,
 }: StepperProps) {
   const cannotStep =
     disabled || !Number.isFinite(value) || !Number.isFinite(step) || step <= 0 || !(min <= max);
@@ -37,6 +41,7 @@ export function Stepper({
     >
       <StepperButton
         direction="decrease"
+        className={buttonClassName}
         aria-label={label + " 줄이기"}
         disabled={cannotStep || decreaseValue >= value}
         onClick={() => onChange(decreaseValue)}
@@ -44,13 +49,17 @@ export function Stepper({
       <output
         aria-live="polite"
         aria-atomic="true"
-        className="min-w-form-touch text-center font-bold text-form-ink tabular-nums"
+        className={cn(
+          "min-w-form-touch text-center font-bold text-form-ink tabular-nums",
+          valueClassName,
+        )}
       >
         {value}
         {unit}
       </output>
       <StepperButton
         direction="increase"
+        className={buttonClassName}
         aria-label={label + " 늘리기"}
         disabled={cannotStep || increaseValue <= value}
         onClick={() => onChange(increaseValue)}
