@@ -3,10 +3,15 @@ import { useNavigate } from "react-router";
 
 import { Check } from "@/components/icons";
 import { LoadingSpinner } from "@/components/Loading";
+import { useRecipes } from "@/hooks/useRecipes";
 
-import { OnboardingHeading, OnboardingScreen } from "./OnboardingScreen";
-
-const demoWaitMs = 2500;
+import { useOnboarding } from "./onboardingContext";
+import {
+  OnboardingButton,
+  OnboardingError,
+  OnboardingHeading,
+  OnboardingScreen,
+} from "./OnboardingScreen";
 
 const steps = [
   { label: "메뉴 이름 읽기", done: true },
@@ -16,16 +21,40 @@ const steps = [
 
 export function IngredientLoadingPage() {
   const navigate = useNavigate();
+  const { store } = useOnboarding();
+  const recipes = useRecipes(store?.id ?? "", { enabled: Boolean(store) });
+  const ready =
+    recipes.isFetchedAfterMount &&
+    !recipes.isFetching &&
+    recipes.data?.generationStatus === "READY" &&
+    !recipes.isError;
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    if (ready) {
       navigate("/onboarding/ingredients", { replace: true });
-    }, demoWaitMs);
-    return () => window.clearTimeout(timer);
-  }, [navigate]);
+    }
+  }, [navigate, ready]);
+
+  if (recipes.isError) {
+    return (
+      <OnboardingScreen
+        step={3}
+        preparingIngredients
+        onBack={() => navigate("../columns")}
+        footer={
+          <OnboardingButton disabled={recipes.isFetching} onClick={() => void recipes.refetch()}>
+            다시 확인
+          </OnboardingButton>
+        }
+      >
+        <OnboardingHeading title="레시피를 확인할 수 없어요" />
+        <OnboardingError>잠시 후 다시 확인해 주세요.</OnboardingError>
+      </OnboardingScreen>
+    );
+  }
 
   return (
-    <OnboardingScreen step={3} wideCard preparingIngredients onBack={() => navigate(-1)}>
+    <OnboardingScreen step={3} wideCard preparingIngredients onBack={() => navigate("../columns")}>
       <OnboardingHeading
         title={
           <>
@@ -60,7 +89,7 @@ export function IngredientLoadingPage() {
           ))}
         </ul>
         <p role="status" className="text-body-m text-text-gray">
-          보통 30초 안에 끝나요. 이 화면을 닫아도 분석은 계속돼요.
+          재료와 사용량을 확인하고 있어요.
         </p>
       </div>
     </OnboardingScreen>

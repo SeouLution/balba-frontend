@@ -24,9 +24,9 @@ export function useSaveRecipes(storeId: string) {
     mutationFn: (body: SaveRecipesRequest) => saveRecipes(storeId, body),
     // 레시피가 바뀌면 재료 목록 · 발주 계산도 달라진다.
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["recipes", storeId] });
       queryClient.invalidateQueries({ queryKey: ["ingredients", storeId] });
       queryClient.invalidateQueries({ queryKey: ["home", storeId] });
+      return queryClient.invalidateQueries({ queryKey: ["recipes", storeId] });
     },
   });
 }

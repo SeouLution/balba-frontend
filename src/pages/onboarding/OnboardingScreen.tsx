@@ -75,7 +75,7 @@ export function OnboardingScreen({
             <ol className="mt-10 grid gap-5 text-subtitle font-bold">
               {progressSteps.map(({ label, details, optional }, index) => {
                 const position = index + 1;
-                const isDone = completed || position < currentStep || (optional && receiptAttached);
+                const isDone = optional ? receiptAttached : completed || position < currentStep;
                 const isCurrent = !isDone && position === currentStep;
                 const isDeferred = optional && !receiptAttached && position < currentStep;
                 return (
