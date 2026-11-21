@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { adjustForecast, getHome, setProduction, type ForecastItem, type Home } from "@/api/home";
 
+import { orderPlanQueryKey } from "./useOrderPlan";
+
 type MenuQuantityVariables = {
   menuId: string;
   quantity: number;
@@ -68,6 +70,8 @@ export function useAdjustForecast(storeId: string, targetDate: string) {
           ? { ...updateForecastItem(home, menuId, () => result.item), order: result.order }
           : home,
       );
+      // 준비량이 바뀌면 거래처별 발주량도 다시 계산되므로 다시 받아온다.
+      void queryClient.invalidateQueries({ queryKey: orderPlanQueryKey(storeId) });
     },
   });
 }
