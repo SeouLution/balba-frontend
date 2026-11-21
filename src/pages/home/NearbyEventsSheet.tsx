@@ -1,8 +1,9 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import type { EventSummary, HomeView } from "@/api/home";
 import { Badge } from "@/components/Badge";
 import { X } from "@/components/icons";
+import { ResponsiveSheet } from "@/components/ResponsiveSheet";
 import { cn } from "@/utils/cn";
 
 import {
@@ -31,106 +32,86 @@ export function NearbyEventsSheet({ view, targetDate, events, onClose }: NearbyE
   const selectedEvents = events.filter((event) => isEventOnDate(event, selectedDate));
   const isToday = selectedDate === today;
 
-  useEffect(() => {
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", closeOnEscape);
-    // 시트가 떠 있는 동안 뒤 화면이 스크롤되지 않게 한다.
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", closeOnEscape);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [onClose]);
-
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
-      <button
-        type="button"
-        aria-label="닫기"
-        onClick={onClose}
-        className="absolute inset-0 bg-text-black/60"
+    <ResponsiveSheet
+      titleId="nearby-events-sheet-title"
+      onClose={onClose}
+      className="flex h-[calc(100dvh-5rem)] flex-col pt-3 md:h-[min(42rem,calc(100dvh-3rem))]"
+    >
+      <span
+        aria-hidden
+        className="mx-auto block h-1.5 w-11 rounded-pill bg-surface-gray-light md:hidden"
       />
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="nearby-events-sheet-title"
-        className="relative flex h-[calc(100dvh-5rem)] w-full max-w-md flex-col rounded-t-3xl bg-button-surface-1 pt-3"
-      >
-        <span aria-hidden className="mx-auto block h-1.5 w-11 rounded-pill bg-surface-gray-light" />
-        <div className="mt-4 flex items-center gap-3 px-5">
-          <h2 id="nearby-events-sheet-title" className="text-label-l font-semibold text-text-black">
-            7일 이내 열리는 행사
-          </h2>
-          <span className="flex-1 text-body-s text-text-gray">3km 이내</span>
-          <button
-            type="button"
-            aria-label="닫기"
-            onClick={onClose}
-            className="flex size-10 items-center justify-center rounded-sm text-border-primary outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20"
-          >
-            <X size={26} aria-hidden />
-          </button>
-        </div>
+      <div className="mt-4 flex items-center gap-3 px-5">
+        <h2 id="nearby-events-sheet-title" className="text-label-l font-semibold text-text-black">
+          7일 이내 열리는 행사
+        </h2>
+        <span className="flex-1 text-body-s text-text-gray">3km 이내</span>
+        <button
+          type="button"
+          aria-label="닫기"
+          onClick={onClose}
+          className="flex size-10 items-center justify-center rounded-sm text-border-primary outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20"
+        >
+          <X size={26} aria-hidden />
+        </button>
+      </div>
 
-        <div role="group" aria-label="요일 선택" className="mt-4 grid grid-cols-7 gap-1 px-3">
-          {week.map((day) => {
-            const isSelected = day.date === selectedDate;
-            const hasEvent = events.some((event) => isEventOnDate(event, day.date));
+      <div role="group" aria-label="요일 선택" className="mt-4 grid grid-cols-7 gap-1 px-3">
+        {week.map((day) => {
+          const isSelected = day.date === selectedDate;
+          const hasEvent = events.some((event) => isEventOnDate(event, day.date));
 
-            return (
-              <button
-                key={day.date}
-                type="button"
-                aria-pressed={isSelected}
-                aria-label={`${day.dayOfMonth}일 ${day.weekday}요일${hasEvent ? ", 행사 있음" : ""}`}
-                onClick={() => setSelectedDate(day.date)}
+          return (
+            <button
+              key={day.date}
+              type="button"
+              aria-pressed={isSelected}
+              aria-label={`${day.dayOfMonth}일 ${day.weekday}요일${hasEvent ? ", 행사 있음" : ""}`}
+              onClick={() => setSelectedDate(day.date)}
+              className={cn(
+                "mx-auto flex h-24 w-11 flex-col items-center gap-1.5 rounded-pill pt-3 outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20",
+                isSelected ? "bg-button-primary text-text-white" : "text-text-gray",
+              )}
+            >
+              <span
                 className={cn(
-                  "mx-auto flex h-24 w-11 flex-col items-center gap-1.5 rounded-pill pt-3 outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20",
-                  isSelected ? "bg-button-primary text-text-white" : "text-text-gray",
+                  "text-label-s",
+                  isSelected ? "text-text-white" : "text-surface-gray-light",
                 )}
               >
-                <span
-                  className={cn(
-                    "text-label-s",
-                    isSelected ? "text-text-white" : "text-surface-gray-light",
-                  )}
-                >
-                  {day.weekday}
-                </span>
-                <span className="text-label-s-b">{day.dayOfMonth}</span>
-                <span
-                  aria-hidden
-                  className={cn(
-                    "size-2 rounded-pill",
-                    hasEvent ? (isSelected ? "bg-text-white" : "bg-button-primary") : "invisible",
-                  )}
-                />
-              </button>
-            );
-          })}
-        </div>
+                {day.weekday}
+              </span>
+              <span className="text-label-s-b">{day.dayOfMonth}</span>
+              <span
+                aria-hidden
+                className={cn(
+                  "size-2 rounded-pill",
+                  hasEvent ? (isSelected ? "bg-text-white" : "bg-button-primary") : "invisible",
+                )}
+              />
+            </button>
+          );
+        })}
+      </div>
 
-        <div className="mt-4 flex-1 overflow-y-auto px-4 pb-8">
-          {selectedEvents.length === 0 ? (
-            <p className="flex h-full items-center justify-center text-body-s text-text-gray">
-              {isToday ? "오늘은 근처 행사가 없어요" : "이 날은 근처 행사가 없어요"}
-            </p>
-          ) : (
-            <>
-              <p className="px-1 text-label-s text-text-gray">총 {selectedEvents.length}건</p>
-              <ul className="mt-3 flex flex-col gap-3">
-                {selectedEvents.map((event) => (
-                  <EventCard key={event.id} event={event} />
-                ))}
-              </ul>
-            </>
-          )}
-        </div>
-      </section>
-    </div>
+      <div className="mt-4 flex-1 overflow-y-auto px-4 pb-8">
+        {selectedEvents.length === 0 ? (
+          <p className="flex h-full items-center justify-center text-body-s text-text-gray">
+            {isToday ? "오늘은 근처 행사가 없어요" : "이 날은 근처 행사가 없어요"}
+          </p>
+        ) : (
+          <>
+            <p className="px-1 text-label-s text-text-gray">총 {selectedEvents.length}건</p>
+            <ul className="mt-3 flex flex-col gap-3">
+              {selectedEvents.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+    </ResponsiveSheet>
   );
 }
 

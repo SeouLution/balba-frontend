@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router";
 
+import { AppPanel } from "@/components/AppPanel";
 import type { Home } from "@/api/home";
 import type { OrderPlan } from "@/api/orderPlans";
 import { AppTabBar } from "@/components/AppTabBar";
@@ -10,6 +11,7 @@ import { useHome } from "@/hooks/useHome";
 import { useOrderPlan } from "@/hooks/useOrderPlan";
 import { usePurchaseOrders } from "@/hooks/usePurchaseOrders";
 import { useStoreId } from "@/hooks/useStoreId";
+import { cn } from "@/utils/cn";
 import { formatSlashMonthDayWeekday, formatWon, shiftDate } from "@/pages/home/homeFormat";
 import { NextOrderNotice } from "@/pages/home/OrderCards";
 
@@ -31,22 +33,30 @@ export function OrderPage() {
   const hasPlan = isTomorrow && plan !== undefined && plan.suppliers.length > 0;
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-button-surface-1">
+    <AppPanel wide>
       <OrderHeader title="발주" onBack={() => navigate("/home")} />
-      <main className="flex flex-1 flex-col gap-6 px-5 pb-8">
+      <main className="flex flex-1 flex-col gap-6 px-5 pb-8 md:px-8">
         {homeQuery.isPending || (isTomorrow && orderPlanQuery.isPending) ? (
           <Loading>발주를 불러오고 있어요.</Loading>
         ) : (
-          <>
+          <div
+            className={cn(
+              "grid items-start gap-6",
+              (hasPlan || home?.view === "TODAY") && "desktop:grid-cols-2",
+            )}
+          >
             {hasPlan && home && <TomorrowOrderCard home={home} plan={plan} />}
             {home?.view === "TODAY" && <PreviewNotice targetDate={home.targetDate} />}
-            <PastPurchaseOrders storeId={storeId} />
+            <PastPurchaseOrders
+              storeId={storeId}
+              className={hasPlan ? "desktop:row-span-2" : undefined}
+            />
             {hasPlan && <OrderStepsCard />}
-          </>
+          </div>
         )}
       </main>
       <AppTabBar />
-    </div>
+    </AppPanel>
   );
 }
 
@@ -97,12 +107,12 @@ function PreviewNotice({ targetDate }: { targetDate: string }) {
   );
 }
 
-function PastPurchaseOrders({ storeId }: { storeId: string }) {
+function PastPurchaseOrders({ storeId, className }: { storeId: string; className?: string }) {
   const purchaseOrdersQuery = usePurchaseOrders(storeId);
   const items = purchaseOrdersQuery.data?.items ?? [];
 
   return (
-    <section>
+    <section className={className}>
       <h2 className="text-label-l font-semibold text-text-gray-darker">지난 발주서</h2>
       {purchaseOrdersQuery.isPending ? (
         <p className="mt-4 text-body-s text-text-gray">지난 발주서를 불러오고 있어요.</p>

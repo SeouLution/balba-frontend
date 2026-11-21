@@ -17,7 +17,8 @@ import {
 // 거래처 미정 묶음(supplier: null)의 React key
 const UNASSIGNED_KEY = "unassigned";
 
-const cardClassName = "rounded-lg border border-border-grey bg-button-surface-1 px-5 py-5";
+const cardClassName =
+  "rounded-lg border border-border-grey bg-button-surface-1 px-5 py-5 desktop:p-6";
 
 /** 단가가 비어 있을 때 영수증을 찍게 안내한다. */
 export function ReceiptPromptCard() {
@@ -61,7 +62,7 @@ export function OrderSummaryCard({ storeId, targetDate, order }: OrderSummaryCar
   return (
     <section className={cardClassName}>
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-subtitle text-text-black">오늘 할 발주</h2>
+        <h2 className="text-subtitle text-text-black 2xl:text-title">오늘 할 발주</h2>
         <button
           type="button"
           aria-label="발주 화면으로 가기"

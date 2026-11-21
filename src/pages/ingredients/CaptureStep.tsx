@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { MAX_RECEIPT_IMAGES } from "@/api/receiptScans";
+import { AppPanel } from "@/components/AppPanel";
 import { ChevronLeft } from "@/components/icons";
 import { useCamera } from "@/hooks/useCamera";
 import { useCreateReceiptScan } from "@/hooks/useReceiptScan";
@@ -55,7 +56,7 @@ export function CaptureStep({ storeId, onBack, onUploaded }: CaptureStepProps) {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-button-primary text-text-white">
+    <AppPanel className="max-w-none bg-button-primary text-text-white md:max-w-2xl">
       <header className="flex h-16 items-center justify-between px-3">
         <button
           type="button"
@@ -71,13 +72,16 @@ export function CaptureStep({ storeId, onBack, onUploaded }: CaptureStepProps) {
         </span>
       </header>
 
-      <div className="relative mx-5 flex-1 overflow-hidden rounded-md border border-dashed border-text-white/40">
+      <div className="relative mx-5 flex-1 overflow-hidden rounded-md border border-dashed border-text-white/40 md:min-h-72">
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
-          className={cn("size-full object-cover", status !== "ready" && "invisible")}
+          className={cn(
+            "size-full object-cover md:absolute md:inset-0 md:object-contain",
+            status !== "ready" && "invisible",
+          )}
         />
         {status !== "ready" && (
           <p className="absolute inset-0 flex items-center justify-center px-6 text-center text-body-m text-text-white/80">
@@ -144,6 +148,6 @@ export function CaptureStep({ storeId, onBack, onUploaded }: CaptureStepProps) {
           <span aria-hidden className="size-15 rounded-pill bg-text-white" />
         </button>
       </div>
-    </div>
+    </AppPanel>
   );
 }

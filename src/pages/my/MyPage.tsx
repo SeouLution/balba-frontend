@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useBlocker } from "react-router";
 
 import type { Store } from "@/api/stores";
+import { AppPanel } from "@/components/AppPanel";
 import { AppTabBar } from "@/components/AppTabBar";
 import { Button } from "@/components/Button";
 import { ChevronRight } from "@/components/icons";
@@ -55,9 +56,9 @@ export function MyPage() {
   const storeQuery = useStore(storeId);
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-button-surface-1">
-      <header className="flex h-16 items-center px-5">
-        <h1 className="text-label-l font-semibold text-button-primary">내정보</h1>
+    <AppPanel>
+      <header className="flex h-16 items-center px-5 md:h-20 md:px-8">
+        <h1 className="text-label-l font-semibold text-button-primary md:text-subtitle">내정보</h1>
       </header>
       {storeQuery.isPending ? (
         <Loading>가게 정보를 불러오고 있어요.</Loading>
@@ -77,7 +78,7 @@ export function MyPage() {
         />
       )}
       <AppTabBar />
-    </div>
+    </AppPanel>
   );
 }
 
@@ -123,7 +124,7 @@ function StoreForm({ storeId, store }: { storeId: string; store: Store }) {
   }
 
   return (
-    <main className="flex flex-1 flex-col px-5 pb-6">
+    <main className="flex flex-1 flex-col px-5 pb-6 md:px-8 md:pb-8">
       <h2 className="mt-4 text-subtitle text-text-black">가게 정보</h2>
       <p className="mt-2 text-body-s text-text-gray-darker">
         주소는 그 동네 날씨와 근처 행사를 가져오는 데만 써요
@@ -180,13 +181,17 @@ function StoreForm({ storeId, store }: { storeId: string; store: Store }) {
             </span>
           </Button>
         </div>
-        <OnboardingButton type="submit" disabled={!isDirty || updateStore.isPending}>
+        <OnboardingButton
+          type="submit"
+          disabled={!isDirty || updateStore.isPending}
+          className="md:w-48 md:justify-self-end"
+        >
           {updateStore.isPending ? "수정하는 중…" : "수정하기"}
         </OnboardingButton>
       </form>
 
       {/* mt-auto로 맨 아래에 두고, 화면이 작아도 수정하기와 붙지 않게 pt로 최소 간격을 둔다. */}
-      <div className="mt-auto pt-10">
+      <div className="mt-auto pt-10 md:mt-0">
         <OnboardingButton
           secondary
           disabled={logOut.isPending}
@@ -195,7 +200,7 @@ function StoreForm({ storeId, store }: { storeId: string; store: Store }) {
               onError: () => showToast("로그아웃하지 못했어요. 다시 눌러 주세요."),
             })
           }
-          className="w-full"
+          className="w-full md:w-48"
         >
           {logOut.isPending ? "로그아웃하는 중…" : "로그아웃"}
         </OnboardingButton>

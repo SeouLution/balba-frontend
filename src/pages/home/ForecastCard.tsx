@@ -19,20 +19,25 @@ export function ForecastCard({ storeId, home }: ForecastCardProps) {
   const { items, totalMenuCount } = home.forecast;
 
   return (
-    <section className="rounded-lg border border-border-grey bg-button-surface-1 px-4 py-5">
-      <div className="flex items-center justify-between">
-        <Badge type="ai">AI 예측</Badge>
-        <span className="text-label-s text-text-gray-darker">전체 {totalMenuCount}개</span>
+    <section className="rounded-lg border border-border-grey bg-button-surface-1 px-4 py-5 desktop:p-6">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-3 desktop:flex desktop:items-start desktop:justify-between">
+        <div className="contents desktop:flex desktop:min-w-0 desktop:flex-wrap desktop:items-center desktop:gap-x-3 desktop:gap-y-1">
+          <h2 className="col-span-2 row-start-2 text-subtitle break-keep text-text-black 2xl:text-title">
+            {isTomorrow ? "오늘 미리 준비해둘 양" : "어젯밤 정한 오늘 준비량"}
+          </h2>
+          <Badge type="ai" className="col-start-1 row-start-1 justify-self-start">
+            AI 예측
+          </Badge>
+        </div>
+        <span className="col-start-2 row-start-1 shrink-0 text-label-s text-text-gray-darker desktop:pt-1 desktop:text-caption">
+          전체 {totalMenuCount}개
+        </span>
       </div>
-      <h2 className="mt-3 text-subtitle text-text-black">
-        {isTomorrow ? "오늘 미리 준비해둘 양" : "어젯밤 정한 오늘 준비량"}
-      </h2>
       <p className="mt-1 text-body-s text-text-gray-darker">
         {isTomorrow ? (
           <>
             숫자가 다르면 고쳐주세요.
-            <br />
-            고친 값으로 다음 예측이 더 정확해져요.
+            <br className="desktop:hidden" /> 고친 값으로 다음 예측이 더 정확해져요.
           </>
         ) : (
           "발주바주와 사장님이 어젯밤 정한 오늘의 준비량이에요."
@@ -69,7 +74,6 @@ function EditableForecastList({ storeId, home }: ForecastCardProps) {
   const [showAll, setShowAll] = useState(false);
   // TODO(api): 홈은 상위 3개 메뉴만 준다. totalMenuCount만큼 더보려면 전체 예측 API가 필요하다.
   const hiddenCount = items.length - VISIBLE_COUNT;
-  const visibleItems = showAll ? items : items.slice(0, VISIBLE_COUNT);
 
   function toggle(menuId: string) {
     setOpenMenuIds((prev) => {
@@ -83,18 +87,24 @@ function EditableForecastList({ storeId, home }: ForecastCardProps) {
   return (
     <>
       <ul className="mt-4 divide-y divide-border-divider border-b border-border-divider">
-        {visibleItems.map((item) => {
+        {items.map((item, index) => {
           const isOpen = openMenuIds.has(item.menu.id);
           const panelId = `forecast-panel-${item.menu.id}`;
 
           return (
-            <li key={item.menu.id} className="py-4">
+            <li
+              key={item.menu.id}
+              className={cn(
+                "py-4 desktop:grid desktop:grid-cols-[minmax(0,1fr)_auto] desktop:items-center desktop:gap-3 desktop:py-3",
+                !showAll && index >= VISIBLE_COUNT && "hidden",
+              )}
+            >
               <button
                 type="button"
                 aria-expanded={isOpen}
                 aria-controls={panelId}
                 onClick={() => toggle(item.menu.id)}
-                className="flex w-full items-center gap-3 rounded-sm text-left outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20"
+                className="flex w-full items-center gap-3 rounded-sm text-left outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20 desktop:hidden"
               >
                 <ForecastSummary item={item} view={home.view} />
                 {isOpen ? (
@@ -103,19 +113,26 @@ function EditableForecastList({ storeId, home }: ForecastCardProps) {
                   <ChevronDown size={22} aria-hidden className="text-text-gray" />
                 )}
               </button>
-              {isOpen && (
-                <div id={panelId} className="mt-3 flex flex-col gap-3">
-                  {item.summaryText && <ReasonBox>{item.summaryText}</ReasonBox>}
-                  <QuantityInput
-                    // 서버 값이 바뀌면(저장 성공 · 실패 되돌림) 입력칸을 새 값으로 다시 그린다.
-                    key={`${item.menu.id}-${item.planned}`}
-                    item={item}
-                    onCommit={(quantity) =>
-                      adjustForecast.mutate({ menuId: item.menu.id, quantity })
-                    }
-                  />
-                </div>
-              )}
+              <div className="hidden min-w-0 desktop:block">
+                <DesktopForecastDetails item={item} />
+              </div>
+              <div
+                id={panelId}
+                className={cn(
+                  "mt-3 flex-col gap-3 desktop:mt-0 desktop:block",
+                  isOpen ? "flex" : "hidden",
+                )}
+              >
+                {item.summaryText && (
+                  <ReasonBox className="desktop:hidden">{item.summaryText}</ReasonBox>
+                )}
+                <QuantityInput
+                  // 서버 값이 바뀌면(저장 성공 · 실패 되돌림) 입력칸을 새 값으로 다시 그린다.
+                  key={`${item.menu.id}-${item.planned}`}
+                  item={item}
+                  onCommit={(quantity) => adjustForecast.mutate({ menuId: item.menu.id, quantity })}
+                />
+              </div>
             </li>
           );
         })}
@@ -130,7 +147,7 @@ function EditableForecastList({ storeId, home }: ForecastCardProps) {
           type="button"
           aria-expanded={showAll}
           onClick={() => setShowAll((prev) => !prev)}
-          className="mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-sm border border-border-grey text-label-l font-semibold text-text-black outline-none hover:bg-bg-hover focus-visible:ring-4 focus-visible:ring-button-primary/20"
+          className="mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-sm border border-border-grey text-label-l font-semibold text-text-black outline-none hover:bg-bg-hover focus-visible:ring-4 focus-visible:ring-button-primary/20 desktop:hidden"
         >
           {showAll ? <ChevronUp size={20} aria-hidden /> : <ChevronDown size={20} aria-hidden />}
           {showAll ? "접기" : `${hiddenCount}개 더보기`}
@@ -162,7 +179,7 @@ function QuantityInput({ item, onCommit }: QuantityInputProps) {
   }
 
   return (
-    <div className="flex gap-3">
+    <div className="flex items-center gap-3 desktop:gap-4">
       <input
         type="text"
         inputMode="numeric"
@@ -173,10 +190,10 @@ function QuantityInput({ item, onCommit }: QuantityInputProps) {
         onKeyDown={(event) => {
           if (event.key === "Enter") event.currentTarget.blur();
         }}
-        className="h-14 min-w-0 flex-1 rounded-sm border border-border-primary bg-button-surface-1 px-4 text-label-l text-text-black tabular-nums outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20"
+        className="h-14 min-w-0 flex-1 rounded-sm border border-border-primary bg-button-surface-1 px-4 text-label-l text-text-black tabular-nums outline-none focus-visible:ring-4 focus-visible:ring-button-primary/20 desktop:h-13 desktop:w-20 desktop:flex-none desktop:border-border-grey"
       />
       {/* 메뉴 단위는 서버가 정한다(항상 인분). 고를 수 없어서 글자로만 보여준다. */}
-      <span className="flex h-14 w-28 shrink-0 items-center rounded-sm border border-border-grey px-4 text-label-l text-text-black">
+      <span className="flex h-14 w-28 shrink-0 items-center rounded-sm border border-border-grey px-4 text-label-l text-text-black desktop:h-auto desktop:w-auto desktop:border-0 desktop:px-0 desktop:text-label-s-b">
         {item.unit}
       </span>
     </div>
@@ -206,9 +223,7 @@ function ForecastSummary({ item, view }: { item: ForecastItem; view: Home["view"
   return (
     <>
       <div className="flex-1">
-        <p className={cn("text-label-l text-text-black", isResting(item) && "line-through")}>
-          {item.menu.name}
-        </p>
+        <ForecastName item={item} />
         {hint && (
           <p className="mt-1 flex items-center gap-1 text-caption text-text-gray-darker">
             {hint.direction === "up" && <ArrowUp size={14} strokeWidth={2.2} aria-hidden />}
@@ -221,6 +236,33 @@ function ForecastSummary({ item, view }: { item: ForecastItem; view: Home["view"
         {isResting(item) ? "쉬어요" : formatQuantity(item.planned, item.unit)}
       </span>
     </>
+  );
+}
+
+function DesktopForecastDetails({ item }: { item: ForecastItem }) {
+  const hint = describeForecastChange(item, "TOMORROW");
+
+  return (
+    <>
+      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+        <ForecastName item={item} />
+        {hint && <Badge type={hint.direction ?? "soft"}>{hint.text}</Badge>}
+      </div>
+      {item.summaryText && <p className="mt-1 text-body-s">{item.summaryText}</p>}
+    </>
+  );
+}
+
+function ForecastName({ item }: { item: ForecastItem }) {
+  return (
+    <p
+      className={cn(
+        "text-label-l wrap-anywhere text-text-black",
+        isResting(item) && "line-through",
+      )}
+    >
+      {item.menu.name}
+    </p>
   );
 }
 

@@ -29,6 +29,7 @@ export function HomePage() {
 
   const home = homeQuery.data;
   const isTomorrow = home.view === "TOMORROW";
+  const targetDateLabel = formatMonthDayWeekday(home.targetDate);
   const order = home.order ?? null;
   const events = home.tiles.events ?? [];
   // TODO(api): order가 null이면 "거래처가 없음(영수증 건너뜀)"과 "오늘 주문할 곳이 없음"을 구분할 수 없다.
@@ -37,32 +38,37 @@ export function HomePage() {
 
   return (
     <HomeLayout storeName={home.storeName}>
-      <DeadlineChip
-        view={home.view}
-        targetDate={home.targetDate}
-        businessHours={home.businessHours}
-      />
-      {isTomorrow ? (
-        <div className="flex items-baseline gap-3 pt-2">
-          <h1 className="text-title text-button-primary">내일 영업 준비</h1>
-          <span className="text-body-m text-text-gray-darker">
-            {formatMonthDayWeekday(home.targetDate)}
-          </span>
+      <header className="flex flex-col gap-4 desktop:grid desktop:grid-cols-[minmax(0,1fr)_auto] desktop:items-end desktop:gap-6">
+        <div className="flex min-w-0 flex-col gap-4 desktop:gap-3">
+          <DeadlineChip
+            view={home.view}
+            targetDate={home.targetDate}
+            businessHours={home.businessHours}
+          />
+          {isTomorrow ? (
+            <div className="flex flex-wrap items-baseline gap-x-3 pt-2 desktop:hidden">
+              <h1 className="text-title text-button-primary">내일 영업 준비</h1>
+              <span className="text-body-m text-text-gray-darker">{targetDateLabel}</span>
+            </div>
+          ) : (
+            <h1 className="pt-2 text-title text-button-primary desktop:hidden">
+              오늘 {targetDateLabel}
+              <br />
+              영업 전
+            </h1>
+          )}
+          <h1 className="hidden text-title break-keep text-button-primary desktop:block xl:text-display-l">
+            {isTomorrow ? `내일 ${targetDateLabel} 준비` : `오늘 ${targetDateLabel} 영업 전`}
+          </h1>
         </div>
-      ) : (
-        <h1 className="pt-2 text-title text-button-primary">
-          오늘 {formatMonthDayWeekday(home.targetDate)}
-          <br />
-          영업 전
-        </h1>
-      )}
 
-      <WeatherRow
-        view={home.view}
-        weather={home.tiles.weather}
-        eventCount={events.length}
-        onEventsClick={() => setIsEventsOpen(true)}
-      />
+        <WeatherRow
+          view={home.view}
+          weather={home.tiles.weather}
+          eventCount={events.length}
+          onEventsClick={() => setIsEventsOpen(true)}
+        />
+      </header>
 
       <HomeBanners
         // 날짜가 바뀌면 닫은 배너 기록을 새 날짜 것으로 다시 읽는다.
@@ -72,13 +78,16 @@ export function HomePage() {
         banners={home.banners}
       />
 
-      <ForecastCard storeId={storeId} home={home} />
-
-      {needsReceipt && <ReceiptPromptCard />}
-      {isTomorrow && order && (
-        <OrderSummaryCard storeId={storeId} targetDate={home.targetDate} order={order} />
-      )}
-      {!isTomorrow && <NextOrderNotice targetDate={home.targetDate} />}
+      <div className="grid grid-cols-1 items-start gap-4 desktop:grid-cols-[minmax(0,1.46fr)_minmax(0,1fr)] desktop:gap-6">
+        <ForecastCard storeId={storeId} home={home} />
+        <div className="grid min-w-0 gap-4 desktop:gap-6">
+          {needsReceipt && <ReceiptPromptCard />}
+          {isTomorrow && order && (
+            <OrderSummaryCard storeId={storeId} targetDate={home.targetDate} order={order} />
+          )}
+          {!isTomorrow && <NextOrderNotice targetDate={home.targetDate} />}
+        </div>
+      </div>
 
       {isEventsOpen && (
         <NearbyEventsSheet
@@ -117,9 +126,11 @@ function HomeError({ error, retry }: { error: Error; retry: () => void }) {
 
 function HomeLayout({ storeName, children }: { storeName?: string; children: ReactNode }) {
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-bg-page">
-      <StoreHeader storeName={storeName ?? ""} className="bg-bg-page" />
-      <main className="flex flex-1 flex-col gap-4 px-4 pb-6">{children}</main>
+    <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-bg-page md:max-w-3xl desktop:max-w-7xl desktop:px-10 desktop:pt-10">
+      <StoreHeader storeName={storeName ?? ""} className="bg-bg-page desktop:hidden" />
+      <main className="flex flex-1 flex-col gap-4 px-4 pb-6 md:px-6 desktop:gap-6 desktop:px-0 desktop:pb-10">
+        {children}
+      </main>
       <AppTabBar />
     </div>
   );
