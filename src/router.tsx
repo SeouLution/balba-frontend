@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router";
 
 import App from "@/App";
 import { CoreIngredientsPage } from "@/pages/onboarding/CoreIngredientsPage";
+import { LoginPage } from "@/pages/onboarding/LoginPage";
 import { OnboardingCompletePage } from "@/pages/onboarding/OnboardingCompletePage";
 import {
   OnboardingLayout,
@@ -16,7 +17,8 @@ import { SalesUploadPage } from "@/pages/onboarding/SalesUploadPage";
 import { StoreInfoPage } from "@/pages/onboarding/StoreInfoPage";
 
 export const router = createBrowserRouter([
-  { path: "/", element: <App /> },
+  { path: "/", element: <LoginPage /> },
+  { path: "/home", element: <App /> },
   {
     path: "/onboarding",
     element: <OnboardingLayout />,

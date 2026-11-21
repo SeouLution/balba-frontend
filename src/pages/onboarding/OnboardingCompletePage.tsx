@@ -27,7 +27,7 @@ export function OnboardingCompletePage() {
       completed
       footer={
         <>
-          <OnboardingButton onClick={() => navigate("/")}>홈으로 가기</OnboardingButton>
+          <OnboardingButton onClick={() => navigate("/home")}>홈으로 가기</OnboardingButton>
           {salesConfirmed && ingredientIds && (
             <OnboardingButton secondary onClick={() => navigate("../recipes")}>
               레시피 다시 보기
