@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router";
 
+import { RequireStore } from "@/components/RequireStore";
 import { HomePage } from "@/pages/home/HomePage";
 import { IngredientPriceFormPage } from "@/pages/ingredients/IngredientPriceFormPage";
 import { IngredientsPage } from "@/pages/ingredients/IngredientsPage";
@@ -28,13 +29,19 @@ import { StoreInfoPage } from "@/pages/onboarding/StoreInfoPage";
 export const router = createBrowserRouter([
   { path: "/", element: <LoginPage /> },
   { path: "/signup", element: <SignUpPage /> },
-  { path: "/home", element: <HomePage /> },
-  { path: "/ingredients", element: <IngredientsPage /> },
-  { path: "/ingredients/recipes/:menuId", element: <RecipeEditPage /> },
-  { path: "/ingredients/:ingredientId/price", element: <IngredientPriceFormPage /> },
-  { path: "/ingredients/menus/new", element: <MenuAddPage /> },
-  { path: "/ingredients/menus/review", element: <MenuReviewPage /> },
-  { path: "/receipt", element: <ReceiptFlowPage /> },
+  {
+    // 가게 id가 필요한 앱 화면. 로그인한 계정의 가게를 불러온 뒤에 그린다.
+    element: <RequireStore />,
+    children: [
+      { path: "/home", element: <HomePage /> },
+      { path: "/ingredients", element: <IngredientsPage /> },
+      { path: "/ingredients/recipes/:menuId", element: <RecipeEditPage /> },
+      { path: "/ingredients/:ingredientId/price", element: <IngredientPriceFormPage /> },
+      { path: "/ingredients/menus/new", element: <MenuAddPage /> },
+      { path: "/ingredients/menus/review", element: <MenuReviewPage /> },
+      { path: "/receipt", element: <ReceiptFlowPage /> },
+    ],
+  },
   {
     path: "/onboarding",
     element: <OnboardingLayout />,
