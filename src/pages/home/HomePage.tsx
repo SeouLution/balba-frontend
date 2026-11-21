@@ -90,7 +90,9 @@ export function HomePage() {
       <ForecastCard storeId={storeId} home={home} />
 
       {needsReceipt && <ReceiptPromptCard />}
-      {isTomorrow && order && <OrderSummaryCard targetDate={home.targetDate} order={order} />}
+      {isTomorrow && order && (
+        <OrderSummaryCard storeId={storeId} targetDate={home.targetDate} order={order} />
+      )}
       {!isTomorrow && <NextOrderNotice targetDate={home.targetDate} />}
 
       {isEventsOpen && (
