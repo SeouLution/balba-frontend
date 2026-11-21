@@ -2,9 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router";
 
 import { ApiError } from "@/api/client";
-import type { StoreCategory } from "@/api/stores";
 import { Button } from "@/components/Button";
-import { Chip } from "@/components/Chip";
 import { ChevronRight } from "@/components/icons";
 import { LoadingSpinner } from "@/components/Loading";
 import { TextField } from "@/components/TextField";
@@ -20,15 +18,6 @@ import {
   OnboardingScreen,
 } from "./OnboardingScreen";
 import { PostcodeSearch } from "./PostcodeSearch";
-
-const categories: { value: StoreCategory; label: string }[] = [
-  { value: "BUNSIK", label: "분식" },
-  { value: "KOREAN_MEAL", label: "한식·백반" },
-  { value: "GUKBAP", label: "국밥" },
-  { value: "BANCHAN", label: "반찬" },
-  { value: "BAKERY", label: "베이커리" },
-  { value: "OTHER", label: "기타" },
-];
 
 export function StoreInfoPage() {
   const navigate = useNavigate();
@@ -55,7 +44,7 @@ export function StoreInfoPage() {
     createStore.mutate(
       {
         name: draft.name.trim(),
-        category: draft.category,
+        category: "BUNSIK",
         // TODO(api): 상세주소를 저장할 필드가 공개 계약에 없다.
         address: { roadAddress: draft.roadAddress },
         businessHours: toBusinessHours(draft.hours),
@@ -155,20 +144,6 @@ export function StoreInfoPage() {
             onChange={(event) => updateDraft({ detailAddress: event.target.value })}
           />
         )}
-        <fieldset>
-          <legend className="mb-2 text-label-s">업종</legend>
-          <div className="flex flex-wrap gap-2">
-            {categories.map(({ value, label }) => (
-              <Chip
-                key={value}
-                selected={draft.category === value}
-                onClick={() => updateDraft({ category: value })}
-              >
-                {label}
-              </Chip>
-            ))}
-          </div>
-        </fieldset>
         <div className="grid gap-1.5">
           <span id="hours-label" className="text-label-s">
             영업 시간 · 쉬는 날

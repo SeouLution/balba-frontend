@@ -1,13 +1,11 @@
 import { useOutletContext } from "react-router";
 
-import type { StoreCategory } from "@/api/stores";
 import type { useSalesImport } from "@/hooks/useSalesImport";
 
 import { initialHours, type HoursDraft } from "./businessHours";
 
 export type StoreDraft = {
   name: string;
-  category: StoreCategory;
   postcode: string;
   roadAddress: string;
   detailAddress: string;
@@ -16,7 +14,6 @@ export type StoreDraft = {
 
 export const initialStoreDraft: StoreDraft = {
   name: "",
-  category: "BUNSIK",
   postcode: "",
   roadAddress: "",
   detailAddress: "",

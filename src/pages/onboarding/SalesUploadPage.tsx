@@ -2,7 +2,6 @@ import { useRef, useState, type DragEvent } from "react";
 import { useNavigate } from "react-router";
 
 import { ApiError } from "@/api/client";
-import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { FilePickerInput } from "@/components/FilePickerInput";
 import { ArrowUpFromLine } from "@/components/icons";
@@ -128,15 +127,6 @@ export function SalesUploadPage() {
           </span>
         )}
       </Button>
-      <div className="mt-4 grid gap-1 rounded-md border border-border-grey p-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-label-l">POS 컴퓨터에서 올리기</p>
-          <Badge>주소 · 코드</Badge>
-        </div>
-        <p className="text-body-s text-text-gray-darker">
-          엑셀이 POS 컴퓨터에 있다면 파일을 이 기기로 옮겨 올려주세요.
-        </p>
-      </div>
       {(fileError || upload.isError) && (
         <div className="mt-4">
           <OnboardingError>
