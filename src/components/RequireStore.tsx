@@ -13,8 +13,8 @@ import { useMe } from "@/hooks/useMe";
 export function RequireStore() {
   const meQuery = useMe();
 
-  // 다른 계정으로 다시 로그인했을 때 이전 계정 정보가 보이지 않게 새로 받아올 때까지 기다린다.
-  if (meQuery.isPending || (!meQuery.isFetchedAfterMount && meQuery.isFetching)) {
+  // 계정을 바꾸면 로그인 · 로그아웃이 캐시를 갈아 끼우므로 처음 받을 때만 기다린다.
+  if (meQuery.isPending) {
     return (
       <div className="mx-auto flex min-h-dvh max-w-md flex-col">
         <Loading>가게 정보를 불러오고 있어요.</Loading>

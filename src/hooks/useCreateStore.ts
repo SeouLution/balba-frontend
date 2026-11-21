@@ -1,10 +1,14 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { getMe } from "@/api/auth";
+import { getMe, type Me } from "@/api/auth";
 import { ApiError } from "@/api/client";
 import { createStore } from "@/api/stores";
 
+import { meQueryKey } from "./useMe";
+
 export function useCreateStore() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (body: Parameters<typeof createStore>[0]) => {
       try {
@@ -17,6 +21,10 @@ export function useCreateStore() {
         if (!storeId) throw error;
         return { id: storeId };
       }
+    },
+    // 계정 캐시의 storeId를 채워야 홈으로 갈 때 온보딩으로 되돌아가지 않는다.
+    onSuccess: ({ id }) => {
+      queryClient.setQueryData<Me>(meQueryKey, (me) => (me ? { ...me, storeId: id } : me));
     },
   });
 }
