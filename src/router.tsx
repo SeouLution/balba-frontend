@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router";
 
 import App from "@/App";
 import { CoreIngredientsPage } from "@/pages/onboarding/CoreIngredientsPage";
+import { IngredientLoadingPage } from "@/pages/onboarding/IngredientLoadingPage";
 import { LoginPage } from "@/pages/onboarding/LoginPage";
 import { OnboardingCompletePage } from "@/pages/onboarding/OnboardingCompletePage";
 import {
@@ -11,6 +12,7 @@ import {
   OnboardingStoreRequired,
 } from "@/pages/onboarding/OnboardingLayout";
 import { OnboardingStartPage } from "@/pages/onboarding/OnboardingStartPage";
+import { ReceiptPhotoPage } from "@/pages/onboarding/ReceiptPhotoPage";
 import { RecipeDraftPage } from "@/pages/onboarding/RecipeDraftPage";
 import { SalesColumnsPage } from "@/pages/onboarding/SalesColumnsPage";
 import { SalesUploadPage } from "@/pages/onboarding/SalesUploadPage";
@@ -30,6 +32,7 @@ export const router = createBrowserRouter([
         children: [
           { path: "upload", element: <SalesUploadPage /> },
           { path: "complete", element: <OnboardingCompletePage /> },
+          { path: "receipt", element: <ReceiptPhotoPage /> },
           {
             element: <OnboardingFileRequired />,
             children: [
@@ -38,6 +41,7 @@ export const router = createBrowserRouter([
                 element: <OnboardingSalesConfirmed />,
                 children: [
                   { path: "ingredients", element: <CoreIngredientsPage /> },
+                  { path: "ingredients/loading", element: <IngredientLoadingPage /> },
                   { path: "recipes", element: <RecipeDraftPage /> },
                 ],
               },

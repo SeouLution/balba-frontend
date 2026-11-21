@@ -16,6 +16,7 @@ export function OnboardingLayout() {
   const [mapping, setMapping] = useState<ColumnMapping>(exampleDetection);
   const [salesConfirmed, setSalesConfirmed] = useState(false);
   const [ingredientIds, setIngredientIds] = useState<string[] | null>(null);
+  const [receiptPhotoCount, setReceiptPhotoCount] = useState(0);
   const [recipeAmounts, setRecipeAmounts] = useState<Record<string, number>>({});
 
   const context: OnboardingContext = {
@@ -27,6 +28,7 @@ export function OnboardingLayout() {
       setMapping(exampleDetection);
       setSalesConfirmed(false);
       setIngredientIds(null);
+      setReceiptPhotoCount(0);
       setRecipeAmounts({});
     },
     mapping,
@@ -35,6 +37,8 @@ export function OnboardingLayout() {
     setSalesConfirmed,
     ingredientIds,
     setIngredientIds,
+    receiptPhotoCount,
+    addReceiptPhotos: (count) => setReceiptPhotoCount((current) => current + count),
     recipeAmounts,
     updateRecipeAmount: (key, amount) =>
       setRecipeAmounts((current) => ({ ...current, [key]: amount })),

@@ -41,6 +41,7 @@ export function SalesColumnsPage() {
   return (
     <OnboardingScreen
       step={2}
+      wideCard={hasChanges}
       onBack={() => navigate("../upload")}
       footer={
         <>
@@ -48,10 +49,10 @@ export function SalesColumnsPage() {
             <OnboardingButton
               onClick={() => {
                 setSalesConfirmed(true);
-                navigate("../ingredients");
+                navigate("../ingredients/loading");
               }}
             >
-              이대로 반영하기
+              맞아요, 다음
             </OnboardingButton>
           ) : (
             <OnboardingButton onClick={() => setEditing(true)}>칸 고치기</OnboardingButton>
@@ -69,14 +70,19 @@ export function SalesColumnsPage() {
       }
     >
       <OnboardingHeading
-        title={hasChanges ? "수정한 칸을 확인해주세요" : "이렇게 읽었는데 맞나요?"}
+        title={
+          <>
+            이렇게 읽었는데
+            <br />
+            맞나요?
+          </>
+        }
       >
-        {ready
-          ? "날짜, 메뉴 이름, 판매 수량을 확인해주세요."
-          : "빨간색으로 표시되어 있는 항목은 못 찾은 항목이에요. 칸 고치기를 눌러 수정해 주세요."}
+        빨간색으로 표시되어 있는 항목은 못 찾은 항목이에요.
+        <br />칸 고치기를 눌러 수정해 주세요.
       </OnboardingHeading>
       <p className="mb-2 text-caption text-text-gray-darker">열과 판매 기록은 예시 데이터예요.</p>
-      <dl className="mb-3 grid grid-cols-3 gap-3">
+      <dl className="mb-3 flex flex-none items-start gap-3 self-stretch md:h-20 md:gap-4">
         {[
           { label: "기간", value: period },
           {
@@ -87,10 +93,10 @@ export function SalesColumnsPage() {
         ].map(({ label, value }) => (
           <div
             key={label}
-            className="min-w-0 rounded-md border border-border-grey bg-bg-page px-2.5 py-3 md:p-4"
+            className="flex min-w-0 flex-1 flex-col items-start gap-1.5 rounded-md border border-border-grey bg-bg-page p-3 md:h-full"
           >
-            <dt className="text-caption text-text-gray-darker">{label}</dt>
-            <dd className="mt-1 text-body-m">{value}</dd>
+            <dt className="text-small text-text-gray-darker">{label}</dt>
+            <dd className="text-number wrap-anywhere text-text-black">{value}</dd>
           </div>
         ))}
       </dl>
@@ -101,11 +107,11 @@ export function SalesColumnsPage() {
             className="flex min-h-12 items-center justify-between gap-4 py-2 text-label-s"
           >
             <dt className="shrink-0 text-text-gray-darker">{label}</dt>
-            <dd className="flex min-w-0 items-center gap-1.5 text-right">
+            <dd className="flex min-w-0 items-center gap-1.5 text-right text-label-s-b font-semibold">
               {mapping[key] ? (
-                <span className="wrap-anywhere">‘{mapping[key]}’ 칸</span>
+                <span className="wrap-anywhere text-text-black">‘{mapping[key]}’ 칸</span>
               ) : (
-                <span className="text-text-gray">미확인 항목</span>
+                <span className="text-text-gray-light">미확인 항목</span>
               )}
               <img src={mapping[key] ? detectedIcon : missingIcon} alt="" className="shrink-0" />
             </dd>

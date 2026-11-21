@@ -71,15 +71,15 @@ export function SalesColumnEditor({
               {mapping[key] ?? "칸 선택"}
               <ChevronDown size={16} aria-hidden />
             </button>
-            {mapping[key] && (
-              <span className="flex items-center gap-1.5 text-label-s text-text-gray-darker">
+            {mapping[key] && mapping[key] === detected[key] && (
+              <span className="flex items-center gap-1.5 text-label-s text-text-positive">
                 <img src={detectedIcon} alt="" />
-                {mapping[key] === detected[key] ? "찾았어요" : "선택했어요"}
+                찾았어요
               </span>
             )}
           </div>
         ))}
-        <div className="flex items-center gap-2 rounded-sm bg-button-subtle px-3 py-2.5 text-caption">
+        <div className="flex items-center gap-2 rounded-sm bg-button-subtle px-3 py-2.5 text-caption text-text-information">
           <img src={columnInfoIcon} alt="" />
           메뉴가 몇 개 팔렸는지 적힌 칸을 골라주세요.
         </div>

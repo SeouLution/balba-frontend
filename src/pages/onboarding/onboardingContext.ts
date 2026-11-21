@@ -32,6 +32,8 @@ export type OnboardingContext = {
   setSalesConfirmed: (confirmed: boolean) => void;
   ingredientIds: string[] | null;
   setIngredientIds: (ids: string[]) => void;
+  receiptPhotoCount: number;
+  addReceiptPhotos: (count: number) => void;
   recipeAmounts: Record<string, number>;
   updateRecipeAmount: (key: string, amount: number) => void;
 };

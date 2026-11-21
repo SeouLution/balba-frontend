@@ -1,72 +1,140 @@
 import { useEffect, useId, useRef, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { Link } from "react-router";
 
+import brandLogo from "@/assets/brand/balba-logo-white.svg";
 import { Button } from "@/components/Button";
-import { Check, ChevronLeft, LogoMark, X } from "@/components/icons";
+import { Check, ChevronLeft, X } from "@/components/icons";
 import { OnboardingIntro } from "@/components/OnboardingIntro";
 import { Progress } from "@/components/Progress";
 import { TopBar } from "@/components/TopBar";
 import { cn } from "@/utils/cn";
 
-const progressLabels = ["가게 정보", "엑셀 올리기", "핵심 재료 고르기", "레시피 초안"];
+const progressSteps: { label: string; details?: string[]; optional?: boolean }[] = [
+  { label: "가게 정보" },
+  { label: "POS 엑셀" },
+  { label: "재료 선택", details: ["AI 재료 정리", "재료 고르기"] },
+  { label: "영수증 (선택)", optional: true },
+  { label: "완료 확인" },
+];
 
 type OnboardingScreenProps = {
   step?: number;
+  sidebarStep?: number;
   onBack?: () => void;
   header?: ReactNode;
   footer?: ReactNode;
   children: ReactNode;
   completed?: boolean;
+  wideCard?: boolean;
+  preparingIngredients?: boolean;
+  scrollBody?: boolean;
+  progressPercent?: number;
 };
 
 export function OnboardingScreen({
   step,
+  sidebarStep,
   onBack,
   header,
   footer,
   children,
   completed,
+  wideCard,
+  preparingIngredients,
+  scrollBody,
+  progressPercent,
 }: OnboardingScreenProps) {
-  const currentStep = completed ? 5 : step;
+  const currentStep = completed ? progressSteps.length : (sidebarStep ?? step);
+  const ingredientDetailIndex = preparingIngredients ? 0 : 1;
 
   return (
     <div className="min-h-dvh bg-bg-page min-[1025px]:grid min-[1025px]:grid-cols-[minmax(290px,29.17%)_1fr]">
-      <aside className="sticky top-0 hidden h-dvh flex-col bg-button-primary px-10 py-10 text-text-white min-[1025px]:flex">
-        <div className="flex items-center gap-2 text-wordmark">
-          <LogoMark size={32} aria-hidden />
-          발주바주
-        </div>
+      <aside
+        className={cn(
+          "sticky top-0 hidden h-dvh flex-col bg-button-primary px-10 py-10 text-text-white min-[1025px]:flex",
+          currentStep && "overflow-y-auto",
+        )}
+      >
+        <img
+          src={brandLogo}
+          alt="발주바주"
+          width={155}
+          height={41}
+          className="shrink-0 self-start"
+        />
         {currentStep ? (
           <>
-            <p className="mt-12 text-body-m font-semibold min-[1200px]:text-subtitle">
+            <p className="mt-12 text-title break-keep">
               원활한 서비스 이용을 위해
               <br />
               몇가지 정보를 입력해 주세요.
             </p>
-            <ol className="mt-6 grid gap-4">
-              {progressLabels.map((label, index) => {
+            <ol className="mt-10 grid gap-5 text-subtitle font-bold">
+              {progressSteps.map(({ label, details, optional }, index) => {
                 const position = index + 1;
+                const isCurrent = position === currentStep;
+                const isDone = position < currentStep && !optional;
                 return (
                   <li
                     key={label}
-                    aria-current={position === currentStep ? "step" : undefined}
-                    className={cn(
-                      "flex items-center gap-3 text-label-s",
-                      position === currentStep && "font-semibold text-ai-spark",
-                      position > currentStep && "text-text-white/60",
-                    )}
+                    aria-current={isCurrent ? "step" : undefined}
+                    className="grid gap-4"
                   >
-                    <span
+                    <div
                       className={cn(
-                        "grid size-7 place-items-center rounded-full border border-text-white/35 text-caption",
-                        position === currentStep &&
-                          "border-ai-spark bg-ai-spark text-button-primary",
-                        position < currentStep && "bg-text-white text-button-primary",
+                        "flex items-center gap-5",
+                        !isCurrent && !isDone && "text-text-gray",
                       )}
                     >
-                      {position < currentStep ? <Check size={16} aria-hidden /> : position}
-                    </span>
-                    {label}
+                      <span
+                        className={cn(
+                          "flex size-[42px] shrink-0 items-center justify-center rounded-full border border-border-primary p-3",
+                          isCurrent && "border-ai-spark bg-ai-spark text-text-black",
+                          isDone && "border-bg-page bg-bg-page text-text-black",
+                        )}
+                      >
+                        {isDone ? (
+                          <Check size={16} className="shrink-0" aria-hidden />
+                        ) : (
+                          <span className="text-center text-label-s-b font-semibold">
+                            {position}
+                          </span>
+                        )}
+                      </span>
+                      <span className="break-keep">{label}</span>
+                    </div>
+                    {details && (
+                      <ul className="grid gap-4 pl-[62px] text-body-m font-normal">
+                        {details.map((detail, detailIndex) => {
+                          const isDetailCurrent =
+                            isCurrent && step === 3 && detailIndex === ingredientDetailIndex;
+                          const isDetailDone =
+                            isDone ||
+                            (isCurrent && (step === 4 || detailIndex < ingredientDetailIndex));
+
+                          return (
+                            <li
+                              key={detail}
+                              aria-current={isDetailCurrent ? "step" : undefined}
+                              className={cn(
+                                "flex items-center gap-2 break-keep",
+                                !isDetailCurrent && !isDetailDone && "text-text-gray",
+                              )}
+                            >
+                              <span
+                                aria-hidden
+                                className={cn(
+                                  "size-2 shrink-0 rounded-full border border-border-primary",
+                                  isDetailCurrent && "border-ai-spark bg-ai-spark",
+                                  isDetailDone && "border-bg-page bg-bg-page",
+                                )}
+                              />
+                              {detail}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
                   </li>
                 );
               })}
@@ -76,8 +144,22 @@ export function OnboardingScreen({
           <OnboardingIntro />
         )}
       </aside>
-      <div className="flex min-w-0 justify-center min-[1025px]:p-10 md:p-6">
-        <main className="flex min-h-dvh w-full min-w-0 flex-col bg-button-surface-1 min-[1025px]:min-h-[calc(100dvh-80px)] md:min-h-[calc(100dvh-48px)] md:max-w-[600px] md:rounded-lg">
+      <div
+        className={cn(
+          "flex min-w-0 justify-center min-[1025px]:p-10",
+          wideCard ? "md:max-[1025px]:p-6" : "md:p-6",
+        )}
+      >
+        <main
+          className={cn(
+            "flex min-h-dvh w-full min-w-0 flex-col bg-button-surface-1 md:max-w-[600px]",
+            wideCard
+              ? "items-start justify-between min-[1025px]:min-h-[calc(100dvh-80px)] md:min-w-[530px] md:overflow-clip md:rounded-[24px] md:max-[1025px]:min-h-[calc(100dvh-48px)] [&>*]:w-full"
+              : "min-[1025px]:min-h-[calc(100dvh-80px)] md:min-h-[calc(100dvh-48px)] md:rounded-lg",
+            scrollBody &&
+              "min-[1025px]:h-[calc(100dvh-80px)] min-[1025px]:min-h-0 md:min-h-0 md:max-[1025px]:h-[calc(100dvh-48px)] md:max-[1025px]:min-h-0 md:[&>:not([data-scroll-body])]:shrink-0",
+          )}
+        >
           {header ??
             (onBack && (
               <TopBar
@@ -86,10 +168,25 @@ export function OnboardingScreen({
                 className="h-[72px] rounded-t-lg pr-5 pl-2 md:h-20 md:pr-10 md:pl-5"
               />
             ))}
-          {step && <Progress value={step} max={4} />}
-          <div className="flex flex-1 flex-col px-5 pt-5 pb-2 md:px-10 md:pt-10">{children}</div>
+          {step && (
+            <Progress value={progressPercent ?? step} max={progressPercent == null ? 4 : 100} />
+          )}
+          <div
+            data-scroll-body={scrollBody || undefined}
+            className={cn(
+              "flex flex-1 flex-col px-5 pt-5 pb-2 md:px-10 md:pt-10",
+              scrollBody && "md:min-h-0 md:overflow-y-auto md:pb-10",
+            )}
+          >
+            {children}
+          </div>
           {footer && (
-            <footer className="grid gap-2.5 px-5 pt-3 pb-[max(20px,env(safe-area-inset-bottom))] md:px-10 md:pb-10">
+            <footer
+              className={cn(
+                "grid gap-2.5 px-5 pt-3 pb-[max(20px,env(safe-area-inset-bottom))] md:px-10 md:pb-10",
+                scrollBody && "md:pt-0",
+              )}
+            >
               {footer}
             </footer>
           )}
@@ -99,9 +196,17 @@ export function OnboardingScreen({
   );
 }
 
-export function OnboardingHeading({ title, children }: { title: ReactNode; children?: ReactNode }) {
+export function OnboardingHeading({
+  title,
+  children,
+  className,
+}: {
+  title: ReactNode;
+  children?: ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="mb-5 grid gap-2">
+    <div className={cn("mb-5 grid gap-2", className)}>
       <h1 className="text-[20px]/7 break-keep max-md:font-medium md:text-title">{title}</h1>
       {children && <p className="text-body-s text-text-gray-darker">{children}</p>}
     </div>

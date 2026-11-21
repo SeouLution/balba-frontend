@@ -24,12 +24,17 @@
   --color-bg-hover: #f3f5fa; /* 칩 호버 배경 */
   --color-surface-white-dark: #e6e9f1; /* 안내 박스 (Figma 이름은 오타로 surface/whtie-dark) */
   --color-surface-gray-light: #ccd1dd; /* 프로그레스 바 빈 칸 */
+  --color-surface-receipt-action: #e6e8f2; /* 영수증 촬영 버튼 영역 */
+  --color-surface-info: #f4f5fa; /* 영수증·레시피 안내 */
 
   /* ── 글자 (text/*) ── */
   --color-text-black: #141a2a; /* 제목, 본문, 보조 버튼 글자 */
   --color-text-gray-darker: #3c4254; /* 설명, 비활성 버튼 글자 */
   --color-text-gray: #686e80; /* 입력칸 예시 글자(placeholder) */
+  --color-text-gray-light: #8a90a3; /* 미확인 항목. TODO: Figma 변수 값 확인 */
   --color-text-white: #ffffff; /* 네이비 위 글자 */
+  --color-text-information: #2a3570; /* 안내 문구 */
+  --color-text-positive: #007653; /* 성공 상태 문구 */
 
   /* ── 테두리 (border/*) ── */
   --color-border-grey: #ccd1dd; /* 입력칸, 보조 버튼, 칩, 날씨 칸 기본 */
