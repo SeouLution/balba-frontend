@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import type { HomeView } from "@/api/home";
-import type { DayHours } from "@/pages/onboarding/onboardingTypes";
+import type { DayHours } from "@/api/stores";
 import { Clock } from "@/components/icons";
 
 import { findTodayClosing, formatRemaining } from "./homeFormat";

@@ -5,18 +5,21 @@ import { cn } from "@/utils/cn";
 
 import { useOnboarding } from "./onboardingContext";
 import { OnboardingButton, OnboardingHeading, OnboardingScreen } from "./OnboardingScreen";
-import { exampleSales } from "./salesColumns";
+import { formatSalesPeriod } from "./salesColumns";
 
 export function OnboardingCompletePage() {
   const navigate = useNavigate();
-  const { draft, salesConfirmed, ingredientIds, receiptPhotoCount } = useOnboarding();
+  const { store, salesImport, salesConfirmed, ingredientIds, receiptPhotoCount } = useOnboarding();
+  const menuCount = salesImport.data?.detection?.menuCount;
+  const salesSummary = [
+    formatSalesPeriod(salesImport.data?.period),
+    menuCount == null ? undefined : `메뉴 ${menuCount.toLocaleString("ko-KR")}개`,
+  ].filter(Boolean);
   const summary = [
-    { label: "가게", value: draft.name.trim(), pending: false },
+    ...(store?.name ? [{ label: "가게", value: store.name, pending: false }] : []),
     {
       label: "판매 기록",
-      value: salesConfirmed
-        ? `${exampleSales.period} · 메뉴 ${exampleSales.menuCount}`
-        : "나중에 올릴게요",
+      value: salesConfirmed ? salesSummary.join(" · ") || "반영 완료" : "나중에 올릴게요",
       pending: !salesConfirmed,
     },
     {
@@ -54,7 +57,7 @@ export function OnboardingCompletePage() {
       </div>
       <OnboardingHeading className="mb-4" title="준비가 끝났어요!">
         {salesConfirmed
-          ? "발주바주가 판매 기록을 보고 재료별 발주량을 계산하기 시작했어요."
+          ? "판매 기록을 가게에 반영했어요."
           : "가게 정보를 입력했어요. 판매 기록은 나중에 올리기로 했어요."}
       </OnboardingHeading>
       <dl className="divide-y divide-border-grey rounded-lg border border-button-subtle px-4.5 py-2">
