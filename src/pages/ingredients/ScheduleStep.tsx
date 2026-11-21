@@ -96,7 +96,13 @@ export function ScheduleStep({ storeId, onBack, onSaved }: ScheduleStepProps) {
             </p>
           )}
           <Button
-            disabled={suppliers.length === 0 || hasSupplierWithoutDays || saveOrderDays.isPending}
+            disabled={
+              suppliers.length === 0 ||
+              hasSupplierWithoutDays ||
+              // 옛 캐시를 보여주는 동안 저장하면 새 거래처가 빠진 목록이 저장된다.
+              suppliersQuery.isFetching ||
+              saveOrderDays.isPending
+            }
             onClick={handleSave}
             className="w-full"
           >
