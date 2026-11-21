@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 
 import { useStoreId } from "@/hooks/useStoreId";
 
@@ -15,6 +15,7 @@ type ReceiptFlowStep =
 /** 3.5 → 3.6 → 3.7 영수증 흐름. 진입: /receipt?returnTo=돌아갈경로 */
 export function ReceiptFlowPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const storeId = useStoreId();
   const [step, setStep] = useState<ReceiptFlowStep>({ name: "capture" });
@@ -24,11 +25,21 @@ export function ReceiptFlowPage() {
     navigate(readReturnPath(searchParams.get("returnTo")), { replace: true });
   }
 
+  function leaveFlow() {
+    // 새 탭 · 새로고침으로 바로 열면 앱 안에 뒤로 갈 기록이 없다(key가 "default").
+    // 그때 navigate(-1)은 아무 일도 안 하거나 앱 밖으로 나가므로 복귀 경로로 보낸다.
+    if (location.key === "default") {
+      navigate(readReturnPath(searchParams.get("returnTo")), { replace: true });
+      return;
+    }
+    navigate(-1);
+  }
+
   if (step.name === "capture") {
     return (
       <CaptureStep
         storeId={storeId}
-        onBack={() => navigate(-1)}
+        onBack={leaveFlow}
         onUploaded={(scanId) => setStep({ name: "classify", scanId })}
       />
     );
