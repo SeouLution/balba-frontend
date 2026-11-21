@@ -30,9 +30,11 @@ export type ManualPurchaseCreate = {
   purchasedOn?: string;
   // 재료 단위(개 · g) 수량
   quantity: number;
+  // 1개 또는 1g당 원. 소수점 이하 최대 6자리
+  unitPrice?: number | null;
 };
 
-/** 영수증 없는 재료 수기 입고. 재고에만 반영되고 단가에는 쓰지 않는다. */
+/** 영수증 없는 재료 수기 입고 */
 export function createPurchase(storeId: string, body: ManualPurchaseCreate) {
   return request<unknown>(`/v1/stores/${storeId}/purchases`, {
     method: "POST",
