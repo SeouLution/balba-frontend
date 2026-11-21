@@ -1,7 +1,13 @@
 import { skipToken, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { ApiError } from "@/api/client";
-import { confirmSalesImport, createSalesImport, getSalesImport } from "@/api/salesImports";
+import {
+  confirmSalesImport,
+  createSalesImport,
+  getSalesImport,
+  updateColumnMapping,
+  type ColumnMappingUpdate,
+} from "@/api/salesImports";
 
 const SALES_IMPORT_POLLING_MS = 2000;
 
@@ -36,6 +42,19 @@ export function useConfirmSalesImport(storeId: string, importId: string) {
     mutationFn: () => confirmSalesImport(storeId, importId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["salesImport", storeId, importId] });
+    },
+  });
+}
+
+export function useUpdateColumnMapping(storeId: string, importId: string) {
+  const queryClient = useQueryClient();
+  const queryKey = ["salesImport", storeId, importId];
+
+  return useMutation({
+    mutationFn: (changes: ColumnMappingUpdate) => updateColumnMapping(storeId, importId, changes),
+    onSuccess: async (result) => {
+      await queryClient.cancelQueries({ queryKey, exact: true });
+      queryClient.setQueryData(queryKey, result);
     },
   });
 }
